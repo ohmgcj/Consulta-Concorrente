@@ -1,0 +1,11 @@
+# Ignore node modules
+node_modules/
+
+# Ignore dados sensíveis
+Dados/*.csv
+Dados/*.xls
+Dados/*.xlsx
+
+# Ignore arquivos temporários, logs, etc
+*.log
+.DS_Store
