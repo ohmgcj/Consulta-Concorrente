@@ -56,6 +56,63 @@ app.get('/api/reguladores', (req, res) => {
     }
 });
 
+// --- ROTA PARA DETALHES + APLICAÇÃO ---
+app.get('/api/regulador/:grupo/:item', async (req, res) => {
+    const { grupo, item } = req.params;
+
+    try {
+        // fetch detalhes
+        const detalheUrl = `https://adm.ikro.com.br/api/produto-conjuntos?filters[wpro_grupo][$eq]=${grupo}&filters[wpro_item][$eq]=${item}`;
+        const aplicacaoUrl = `https://adm.ikro.com.br/api/aplicacao-produtos?filters[wpro_grupo][$eq]=${grupo}&filters[wpro_item][$eq]=${item}`;
+
+        const [detalheResp, aplicacaoResp] = await Promise.all([
+            axios.get(detalheUrl),
+            axios.get(aplicacaoUrl)
+        ]);
+
+        const detalheData = detalheResp.data?.data || [];
+        const aplicacaoData = aplicacaoResp.data?.data || [];
+
+        res.json({
+            detalhe: detalheData,
+            aplicacao: aplicacaoData
+        });
+    } catch (e) {
+        console.error("Erro ao buscar detalhes/aplicação", e.message);
+        res.status(500).json({ message: "Erro ao buscar dados externos" });
+    }
+});
+
+// --- DETALHE + APLICAÇÃO DO PRODUTO ---
+app.get('/api/regulador-detalhes', async (req, res) => {
+    const { grupo, item } = req.query;
+    // desenvolvido por godoy.js caio "jesus" godoy
+    if (!grupo || !item) {
+        return res.status(400).json({ message: 'Grupo e item são obrigatórios' });
+    }
+
+    try {
+        const detalheUrl = `https://adm.ikro.com.br/api/produto-conjuntos?filters[wpro_grupo][$eq]=${grupo}&filters[wpro_item][$eq]=${item}`;
+        const aplicacaoUrl = `https://adm.ikro.com.br/api/aplicacao-produtos?filters[wpro_grupo][$eq]=${grupo}&filters[wpro_item][$eq]=${item}`;
+
+        const [detalheResp, aplicacaoResp] = await Promise.all([
+            axios.get(detalheUrl),
+            axios.get(aplicacaoUrl)
+        ]);
+
+        res.json({
+            detalhe: detalheResp.data?.data || [],
+            aplicacao: aplicacaoResp.data?.data || []
+        });
+
+    } catch (error) {
+        console.error('Erro ao buscar detalhes:', error.message);
+        res.status(500).json({ message: 'Erro ao buscar dados externos' });
+    }
+});
+
+
+
 // --- SERVIR ARQUIVOS ESTÁTICOS E INICIAR ---
 app.use(express.static(__dirname));
 app.listen(PORT, () => {

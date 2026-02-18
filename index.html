@@ -1,120 +1,261 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buscador de Produtos</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portal Interno de Produtos</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 font-sans flex items-center justify-center min-h-screen">
+  </head>
 
-    <div class="container mx-auto w-full max-w-md bg-white p-8 rounded-lg shadow-lg text-center">
-        <h1 class="text-2xl font-bold text-gray-800 mb-2">Buscador de Produtos</h1>
-        <p class="text-gray-600 mb-6">Digite a referência exata para buscar a imagem.</p>
-        
-        <input 
-            type="text" 
-            id="searchInput" 
-            placeholder="Digite a referência do item..."
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-        >
-        
-        <div id="image-container" class="mt-6 flex justify-center items-center min-h-[250px] bg-gray-50 rounded-md p-4 border">
-            <p id="status-message" class="text-gray-500">Aguardando busca...</p>
+  <body class="bg-gray-100 font-sans min-h-screen flex flex-col">
+    <!-- HEADER -->
+    <header
+      class="bg-[#2e2e2e] text-white px-8 py-4 flex justify-between items-center shadow-lg"
+    >
+      <h1 class="text-xl font-semibold tracking-wide">
+        Portal Técnico Interno
+      </h1>
+      <span class="text-sm text-[#cd9931] font-medium"> Protótipo v2.0 </span>
+    </header>
+
+    <!-- CONTEÚDO -->
+    <main class="flex-grow flex items-start justify-center p-6">
+      <div class="w-full max-w-4xl">
+        <!-- CARD BUSCA -->
+        <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+          <h2 class="text-lg font-semibold mb-4 pb-2 border-b-2 border-[#cd9931] text-[#2e2e2e]">
+            Consulta de Produto
+          </h2>
+
+          <div class="flex gap-3">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Digite o código interno..."
+              class="flex-grow px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+            <button
+              id="searchButton"
+              class="bg-[#cd9931] hover:bg-[#b88322] text-white px-6 py-2 rounded-xl transition font-medium shadow-md"
+            >
+              Buscar
+            </button>
+          </div>
+
+          <p id="status-message" class="text-sm text-gray-500 mt-3">
+            Carregando dados...
+          </p>
         </div>
-    </div>
 
-<script>
-    // ... (as constantes de antes continuam as mesmas)
-    const apiUrl = '/api/reguladores';
-    const mappingUrl = '/mapeamento.json';
-    let products = [];
-    let codeMapping = [];
-    const searchInput = document.getElementById('searchInput');
-    const imageContainer = document.getElementById('image-container');
-    const statusMessage = document.getElementById('status-message');
+        <!-- RESULTADO -->
+        <div
+          id="result-container"
+          class="bg-white p-6 rounded-xl shadow-md hidden"
+        >
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- IMAGEM -->
+            <div
+              class="flex justify-center items-center bg-gray-50 p-4 rounded-lg border"
+            >
+              <img id="product-image" class="max-h-72 object-contain hidden" />
+              <div id="image-placeholder" class="text-gray-400">Sem imagem</div>
+            </div>
 
-    // Função para tentar buscar os dados
-    function fetchData() {
-        // Mostra a mensagem de carregamento
-        statusMessage.textContent = 'Carregando dados dos produtos...';
+            <!-- INFO -->
+            <div>
+              <h3
+                id="product-title"
+                class="text-xl font-semibold text-gray-800 mb-3"
+              ></h3>
+
+              <div class="space-y-2 text-sm text-gray-700">
+                <p><strong>Linha:</strong> <span id="product-line"></span></p>
+                <p><strong>Grupo:</strong> <span id="product-group"></span></p>
+                <p><strong>Item:</strong> <span id="product-item"></span></p>
+                <p>
+                  <strong>Preço Bruto:</strong> <span id="product-price"></span>
+                </p>
+                <div class="mt-4">
+                  <p>
+                    <strong> Especificação </strong>
+                  </p>
+                  <div
+                    id="product-specification"
+                    class="text-sm text-gray-600 space-y-1"
+                  ></div>
+                </div>
+                <div class="mt-4">
+                  <h4 class="font-semibold text-gray-800 mb-2">Aplicações</h4>
+                  <ul
+                    id="product-application"
+                    class="text-sm text-gray-600 list-disc list-inside space-y-1"
+                  ></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const apiUrl = "/api/reguladores";
+      const mappingUrl = "/mapeamento.json";
+
+      let products = [];
+      let codeMapping = [];
+
+      const searchInput = document.getElementById("searchInput");
+      const searchButton = document.getElementById("searchButton");
+      const statusMessage = document.getElementById("status-message");
+      const resultContainer = document.getElementById("result-container");
+      const productImage = document.getElementById("product-image");
+      const imagePlaceholder = document.getElementById("image-placeholder");
+      const productTitle = document.getElementById("product-title");
+      const productLine = document.getElementById("product-line");
+      const productGroup = document.getElementById("product-group");
+      const productItem = document.getElementById("product-item");
+      const productPrice = document.getElementById("product-price");
+      const productSpecification = document.getElementById(
+        "product-specification",
+      );
+      const productApplication = document.getElementById("product-application");
+
+      // ---------------- FETCH INICIAL ----------------
+      function fetchData() {
+        statusMessage.textContent = "Carregando base de dados...";
 
         Promise.all([
-            fetch(apiUrl), // Separa os fetches para tratar as respostas individualmente
-            fetch(mappingUrl).then(res => res.json())
+          fetch(apiUrl),
+          fetch(mappingUrl).then((res) => res.json()),
         ])
-        .then(async ([apiResponse, mappingData]) => {
-            // Verifica a resposta da API de produtos
+          .then(async ([apiResponse, mappingData]) => {
             if (!apiResponse.ok) {
-                // Se o status for 503 (Serviço Indisponível), esperamos e tentamos de novo
-                if (apiResponse.status === 503) {
-                    console.log('Servidor ainda não está pronto. Tentando novamente em 2 segundos...');
-                    statusMessage.textContent = 'Aguardando o servidor preparar os dados...';
-                    setTimeout(fetchData, 2000); // Tenta de novo após 2 segundos
-                    return; // Para a execução aqui
-                }
-                // Lança um erro para outras respostas não-OK
-                throw new Error(`Erro na API: ${apiResponse.statusText}`);
+              if (apiResponse.status === 503) {
+                statusMessage.textContent = "Servidor preparando dados...";
+                setTimeout(fetchData, 2000);
+                return;
+              }
+              throw new Error("Erro na API");
             }
 
-            // Se a resposta foi OK, processamos os dados
-            const apiData = await apiResponse.json();
-            products = apiData; 
+            products = await apiResponse.json();
             codeMapping = mappingData;
 
-            console.log('Reguladores carregados:', products.length);
-            console.log('Mapeamento de códigos carregado:', codeMapping.length);
-            statusMessage.textContent = 'Pronto para a busca. Digite seu código.';
-        })
-        .catch(error => {
-            console.error('Erro ao carregar os dados:', error);
-            statusMessage.textContent = 'Erro ao carregar dados iniciais.';
-        });
-    }
+            statusMessage.textContent = "Pronto para consulta.";
+          })
+          .catch((err) => {
+            console.error(err);
+            statusMessage.textContent = "Erro ao carregar dados.";
+          });
+      }
 
-    // Inicia a primeira tentativa de buscar os dados
-    document.addEventListener('DOMContentLoaded', fetchData);
+      document.addEventListener("DOMContentLoaded", fetchData);
 
-    // A lógica de busca (searchInput.addEventListener) continua EXATAMENTE a mesma de antes.
-    // ... (cole aqui o seu código do addEventListener que já estava funcionando)
-    searchInput.addEventListener('input', (event) => {
-        const userInput = event.target.value.trim();
-
-        if (!userInput) {
-            imageContainer.innerHTML = '<p id="status-message" class="text-gray-500">Digite uma referência para começar.</p>';
-            return;
-        }
+      // ---------------- BUSCA ----------------
+      function buscarProduto() {
+        const userInput = searchInput.value.trim();
+        if (!userInput) return;
 
         let searchTerm = userInput;
-        // Linha corrigida
-	const mappingEntry = codeMapping.find(item => String(item.meu_codigo) === userInput);
+
+        const mappingEntry = codeMapping.find(
+          (item) => String(item.meu_codigo) === userInput,
+        );
 
         if (mappingEntry) {
-            searchTerm = mappingEntry.codigo_api;
+          searchTerm = mappingEntry.codigo_api;
         }
-        
-        const foundProduct = products.find(product => {
-            const attrs = product.attributes;
-            const term = searchTerm;
 
-            return (
-                attrs.refer_interna === term ||
-                attrs.refer_item_assoc_1 === term ||
-                attrs.refer_item_assoc_2 === term ||
-                attrs.refer_item_assoc_3 === term ||
-                attrs.refer_item_assoc_4 === term ||
-                attrs.refer_item_assoc_5 === term ||
-                attrs.imagem?.some(img => img.referencia === term)
-            );
+        const foundProduct = products.find((product) => {
+          const attrs = product.attributes;
+          return (
+            attrs.refer_interna === searchTerm ||
+            attrs.refer_item_assoc_1 === searchTerm ||
+            attrs.refer_item_assoc_2 === searchTerm ||
+            attrs.refer_item_assoc_3 === searchTerm ||
+            attrs.refer_item_assoc_4 === searchTerm ||
+            attrs.refer_item_assoc_5 === searchTerm ||
+            attrs.imagem?.some((img) => img.referencia === searchTerm)
+          );
         });
 
-        if (foundProduct?.attributes?.imagem?.length > 0) {
-            const imageBase64 = foundProduct.attributes.imagem[0].imagem_produto_seq1;
-            imageContainer.innerHTML = `<img src="${imageBase64}" alt="Imagem do produto ${searchTerm}" class="max-w-full h-auto rounded-md shadow-md">`;
-        } else {
-            imageContainer.innerHTML = '<p id="status-message" class="text-gray-700">Produto não encontrado.</p>';
+        if (!foundProduct) {
+          resultContainer.classList.add("hidden");
+          statusMessage.textContent = "Produto não encontrado.";
+          return;
         }
-    });
-</script>
-</body>
+
+        const attrs = foundProduct.attributes;
+
+        // ---------------- DADOS PRINCIPAIS ----------------
+        productTitle.textContent = attrs.refer_interna || "Produto";
+        productLine.textContent = attrs.descr_linha || "-";
+        productGroup.textContent = attrs.grupo || "-";
+        productItem.textContent = attrs.item || "-";
+        if (attrs.especificacao?.especificacao) {
+          productSpecification.innerHTML = attrs.especificacao.especificacao;
+        } else {
+          productSpecification.textContent = "Sem especificação.";
+        }
+
+        console.log(attrs);
+
+        // PREÇO (vem do endpoint principal)
+        productPrice.textContent = attrs.preco_bruto
+          ? Number(attrs.preco_bruto).toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })
+          : "-";
+
+        // IMAGEM
+        if (attrs.imagem?.length > 0) {
+          productImage.src = attrs.imagem[0].imagem_produto_seq1;
+          productImage.classList.remove("hidden");
+          imagePlaceholder.classList.add("hidden");
+        } else {
+          productImage.classList.add("hidden");
+          imagePlaceholder.classList.remove("hidden");
+        }
+
+        // ---------------- APLICAÇÕES (endpoint extra) ----------------
+        productApplication.innerHTML = "<li>Carregando aplicações...</li>";
+
+        fetch(`/api/regulador-detalhes?grupo=${attrs.grupo}&item=${attrs.item}`)
+          .then((res) => res.json())
+          .then((data) => {
+            productApplication.innerHTML = "";
+
+            if (data.aplicacao?.length > 0) {
+              data.aplicacao.forEach((app) => {
+                const li = document.createElement("li");
+
+                const attrs = app.attributes;
+
+                li.textContent = `${attrs.marca_aplic} – ${attrs.aplicacao}`;
+
+                productApplication.appendChild(li);
+              });
+            } else {
+              productApplication.innerHTML =
+                "<li>Sem aplicações cadastradas.</li>";
+            }
+          })
+          .catch(() => {
+            productApplication.innerHTML =
+              "<li>Erro ao carregar aplicações.</li>";
+          });
+
+        resultContainer.classList.remove("hidden");
+        statusMessage.textContent = "";
+      }
+
+      // Eventos
+      searchButton.addEventListener("click", buscarProduto);
+      searchInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") buscarProduto();
+      });
+    </script>
+  </body>
 </html>
