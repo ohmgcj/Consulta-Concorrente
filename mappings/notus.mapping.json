@@ -1,0 +1,578 @@
+[
+  {
+    "Produto": "EV101001",
+    "Código de Conversão": "EL-20736.0"
+  },
+  {
+    "Produto": "EV101002",
+    "Código de Conversão": "EL-5729.1"
+  },
+  {
+    "Produto": "EV101004",
+    "Código de Conversão": "EL-5729.1"
+  },
+  {
+    "Produto": "EV101005",
+    "Código de Conversão": "EL-3592.2"
+  },
+  {
+    "Produto": "EV101006",
+    "Código de Conversão": "EL-7061.0"
+  },
+  {
+    "Produto": "EV101007",
+    "Código de Conversão": "EL-22540.1"
+  },
+  {
+    "Produto": "EV101008",
+    "Código de Conversão": "EL-7077.2"
+  },
+  {
+    "Produto": "EV101009",
+    "Código de Conversão": "EL.2008.0"
+  },
+  {
+    "Produto": "EV101011",
+    "Código de Conversão": "EL-7091.0"
+  },
+  {
+    "Produto": "EV101012",
+    "Código de Conversão": "EL-7061.0"
+  },
+  {
+    "Produto": "EV101013",
+    "Código de Conversão": "EL-5664.0"
+  },
+  {
+    "Produto": "EV101014",
+    "Código de Conversão": "EL-5183.0"
+  },
+  {
+    "Produto": "EV101015",
+    "Código de Conversão": "EL-4522.1"
+  },
+  {
+    "Produto": "EV101016",
+    "Código de Conversão": "EL-7014.0"
+  },
+  {
+    "Produto": "EV101017",
+    "Código de Conversão": "EL-7062.0"
+  },
+  {
+    "Produto": "EV101018",
+    "Código de Conversão": "EL-7062.0"
+  },
+  {
+    "Produto": "EV101020",
+    "Código de Conversão": "GM-4643.2"
+  },
+  {
+    "Produto": "EV101022",
+    "Código de Conversão": "EL-7140.2"
+  },
+  {
+    "Produto": "EV101024",
+    "Código de Conversão": "EL-20016.0"
+  },
+  {
+    "Produto": "EV101025",
+    "Código de Conversão": "EL-5729.2"
+  },
+  {
+    "Produto": "EV101026",
+    "Código de Conversão": "GM-7140.0"
+  },
+  {
+    "Produto": "EV101028",
+    "Código de Conversão": "EL-5738.1"
+  },
+  {
+    "Produto": "EV101029",
+    "Código de Conversão": "EL-22257.3"
+  },
+  {
+    "Produto": "EV101031",
+    "Código de Conversão": "EL-7117.0"
+  },
+  {
+    "Produto": "EV101033",
+    "Código de Conversão": "EL-22257.2"
+  },
+  {
+    "Produto": "EV101034",
+    "Código de Conversão": "EL-5738.2"
+  },
+  {
+    "Produto": "EV101035",
+    "Código de Conversão": "EL-7065.0"
+  },
+  {
+    "Produto": "EV101036",
+    "Código de Conversão": "EL-7137.2"
+  },
+  {
+    "Produto": "EV101037",
+    "Código de Conversão": "EL-2562.1"
+  },
+  {
+    "Produto": "EV101038",
+    "Código de Conversão": "EL-20736.2"
+  },
+  {
+    "Produto": "EV101039",
+    "Código de Conversão": "GM-7140.2"
+  },
+  {
+    "Produto": "EV101040",
+    "Código de Conversão": "EL-7100.1"
+  },
+  {
+    "Produto": "EV101043",
+    "Código de Conversão": "EL-4700.1"
+  },
+  {
+    "Produto": "EV101044",
+    "Código de Conversão": "EL-7140.1"
+  },
+  {
+    "Produto": "EV101048",
+    "Código de Conversão": "EL-4573.0"
+  },
+  {
+    "Produto": "EV101050",
+    "Código de Conversão": "EL-4643.2"
+  },
+  {
+    "Produto": "EV101052",
+    "Código de Conversão": "EL-7113.2"
+  },
+  {
+    "Produto": "EV101054",
+    "Código de Conversão": "EL-3374.0"
+  },
+  {
+    "Produto": "EV101055",
+    "Código de Conversão": "EL-20736.0"
+  },
+  {
+    "Produto": "EV101057",
+    "Código de Conversão": "EL-2822.2"
+  },
+  {
+    "Produto": "EV101058",
+    "Código de Conversão": "GM-2648.2"
+  },
+  {
+    "Produto": "EV101064",
+    "Código de Conversão": "EL-20011.0"
+  },
+  {
+    "Produto": "EV101076",
+    "Código de Conversão": "GM-7011.0"
+  },
+  {
+    "Produto": "EV101077",
+    "Código de Conversão": "20016"
+  },
+  {
+    "Produto": "EV101085",
+    "Código de Conversão": "EL-20732.0"
+  },
+  {
+    "Produto": "EV101129",
+    "Código de Conversão": "GM-7113.1"
+  },
+  {
+    "Produto": "EV101130",
+    "Código de Conversão": "GM-3376.0"
+  },
+  {
+    "Produto": "EV101132",
+    "Código de Conversão": "EL-7137.1"
+  },
+  {
+    "Produto": "EV101134",
+    "Código de Conversão": "EL-20300.0"
+  },
+  {
+    "Produto": "IC30001",
+    "Código de Conversão": "NT-20585.4"
+  },
+  {
+    "Produto": "IC30002",
+    "Código de Conversão": "NT-20125.4"
+  },
+  {
+    "Produto": "IC30003",
+    "Código de Conversão": "NT-20006.4"
+  },
+  {
+    "Produto": "IC30004",
+    "Código de Conversão": "NT-20108.4"
+  },
+  {
+    "Produto": "IC30006",
+    "Código de Conversão": "NT-20578.4"
+  },
+  {
+    "Produto": "IC30007",
+    "Código de Conversão": "NT-21057.4"
+  },
+  {
+    "Produto": "IC32611",
+    "Código de Conversão": "NT-1123.4"
+  },
+  {
+    "Produto": "IC32612",
+    "Código de Conversão": "NT-20574.4"
+  },
+  {
+    "Produto": "PV0065",
+    "Código de Conversão": "20016"
+  },
+  {
+    "Produto": "RA30001",
+    "Código de Conversão": "NT-20549.126"
+  },
+  {
+    "Produto": "RA30002",
+    "Código de Conversão": "NT-20011.116"
+  },
+  {
+    "Produto": "RA30003",
+    "Código de Conversão": "NT-20020.126"
+  },
+  {
+    "Produto": "RA30005",
+    "Código de Conversão": "NT-20185.016"
+  },
+  {
+    "Produto": "RA30006",
+    "Código de Conversão": "NT-7015.126"
+  },
+  {
+    "Produto": "RA30007",
+    "Código de Conversão": "NT-20090.116"
+  },
+  {
+    "Produto": "RA30009",
+    "Código de Conversão": "NT-20229.116"
+  },
+  {
+    "Produto": "RA30010",
+    "Código de Conversão": "NT-2787.116"
+  },
+  {
+    "Produto": "RA30011",
+    "Código de Conversão": "NT-2978.126"
+  },
+  {
+    "Produto": "RA30013",
+    "Código de Conversão": "NT-2981.116"
+  },
+  {
+    "Produto": "RA30015",
+    "Código de Conversão": "NT-20577.126"
+  },
+  {
+    "Produto": "RA30017",
+    "Código de Conversão": "NT-20044.136"
+  },
+  {
+    "Produto": "RA30018",
+    "Código de Conversão": "NT-20108.126"
+  },
+  {
+    "Produto": "RA30019",
+    "Código de Conversão": "NT-20010.126"
+  },
+  {
+    "Produto": "RA30020",
+    "Código de Conversão": "NT-20109.126"
+  },
+  {
+    "Produto": "RA30021",
+    "Código de Conversão": "NT-2995.126"
+  },
+  {
+    "Produto": "RA30023",
+    "Código de Conversão": "ZT-2859.126"
+  },
+  {
+    "Produto": "RA30024",
+    "Código de Conversão": "NT-7136.534"
+  },
+  {
+    "Produto": "RA30025",
+    "Código de Conversão": "NT-3376.116"
+  },
+  {
+    "Produto": "RA30026",
+    "Código de Conversão": "NT-20180.116"
+  },
+  {
+    "Produto": "RA30027",
+    "Código de Conversão": "NT-20084.116"
+  },
+  {
+    "Produto": "RA30028",
+    "Código de Conversão": "NT-20032.116"
+  },
+  {
+    "Produto": "RA30029",
+    "Código de Conversão": "NT-20018.126"
+  },
+  {
+    "Produto": "RA30030",
+    "Código de Conversão": "NT-2354.116"
+  },
+  {
+    "Produto": "RA30031",
+    "Código de Conversão": "NT-20348.126"
+  },
+  {
+    "Produto": "RA32203",
+    "Código de Conversão": "NT-7008.523"
+  },
+  {
+    "Produto": "RA32208",
+    "Código de Conversão": "NT-22208.534"
+  },
+  {
+    "Produto": "RA32209",
+    "Código de Conversão": "NT-22209.523"
+  },
+  {
+    "Produto": "RA32210",
+    "Código de Conversão": "NT-7014.5354"
+  },
+  {
+    "Produto": "RA32216",
+    "Código de Conversão": "NT-5664.523"
+  },
+  {
+    "Produto": "RA32223",
+    "Código de Conversão": "NT-20752.523"
+  },
+  {
+    "Produto": "RA32224",
+    "Código de Conversão": "NT-22224.534"
+  },
+  {
+    "Produto": "RA32231",
+    "Código de Conversão": "NT-20087.116"
+  },
+  {
+    "Produto": "RA32233",
+    "Código de Conversão": "NT-20734.523"
+  },
+  {
+    "Produto": "RA32234",
+    "Código de Conversão": "NT-20011.523"
+  },
+  {
+    "Produto": "RA32246",
+    "Código de Conversão": "NT-22246.126"
+  },
+  {
+    "Produto": "RA32247",
+    "Código de Conversão": "NT-22247.126"
+  },
+  {
+    "Produto": "RA32251",
+    "Código de Conversão": "NT-7194.523"
+  },
+  {
+    "Produto": "RA32257",
+    "Código de Conversão": "NT-22257.534"
+  },
+  {
+    "Produto": "RA32471",
+    "Código de Conversão": "NT-20022.116"
+  },
+  {
+    "Produto": "RA32502",
+    "Código de Conversão": "NT-7065.534"
+  },
+  {
+    "Produto": "RA32503",
+    "Código de Conversão": "NT-7061.523"
+  },
+  {
+    "Produto": "RA32504",
+    "Código de Conversão": "NT-7062.534"
+  },
+  {
+    "Produto": "RA32508",
+    "Código de Conversão": "NT-7067.523"
+  },
+  {
+    "Produto": "RA32509",
+    "Código de Conversão": "NT-7067.534"
+  },
+  {
+    "Produto": "RA32513",
+    "Código de Conversão": "NT-5729.523"
+  },
+  {
+    "Produto": "RA32517",
+    "Código de Conversão": "NT-5183.523"
+  },
+  {
+    "Produto": "RA32520",
+    "Código de Conversão": "NT-7077.523"
+  },
+  {
+    "Produto": "RA32522",
+    "Código de Conversão": "NT-7077.534"
+  },
+  {
+    "Produto": "RA32528",
+    "Código de Conversão": "NT-20736.523"
+  },
+  {
+    "Produto": "RA32529",
+    "Código de Conversão": "NT-20737.523"
+  },
+  {
+    "Produto": "RA32534",
+    "Código de Conversão": "NT-3593.523"
+  },
+  {
+    "Produto": "RA32535",
+    "Código de Conversão": "NT-3592.534"
+  },
+  {
+    "Produto": "RA32540",
+    "Código de Conversão": "NT-7091.523"
+  },
+  {
+    "Produto": "RA32542",
+    "Código de Conversão": "NT-20731.523"
+  },
+  {
+    "Produto": "RA32543",
+    "Código de Conversão": "NT-20732.523"
+  },
+  {
+    "Produto": "RA32547",
+    "Código de Conversão": "NT-21002.116"
+  },
+  {
+    "Produto": "RA32554",
+    "Código de Conversão": "NT-20009.126"
+  },
+  {
+    "Produto": "RA32558",
+    "Código de Conversão": "NT-2428.116"
+  },
+  {
+    "Produto": "RA32561",
+    "Código de Conversão": "NT-29224.523"
+  },
+  {
+    "Produto": "RA32562",
+    "Código de Conversão": "NT-7100.126"
+  },
+  {
+    "Produto": "RA32562",
+    "Código de Conversão": "NT-7100.523"
+  },
+  {
+    "Produto": "RA32573",
+    "Código de Conversão": "NT-4381.126"
+  },
+  {
+    "Produto": "RA32574",
+    "Código de Conversão": "NT-4307.126"
+  },
+  {
+    "Produto": "RA32575",
+    "Código de Conversão": "NT-7113.523"
+  },
+  {
+    "Produto": "RA32577",
+    "Código de Conversão": "NT-7114.523"
+  },
+  {
+    "Produto": "RA32579",
+    "Código de Conversão": "NT-7116.523"
+  },
+  {
+    "Produto": "RA32580",
+    "Código de Conversão": "NT-7117.523"
+  },
+  {
+    "Produto": "RA32599",
+    "Código de Conversão": "NT-4785.126"
+  },
+  {
+    "Produto": "RA32600",
+    "Código de Conversão": "NT-2927.016"
+  },
+  {
+    "Produto": "RA32605",
+    "Código de Conversão": "NT-3068.016"
+  },
+  {
+    "Produto": "RA32626",
+    "Código de Conversão": "NT-20067.116"
+  },
+  {
+    "Produto": "RA32628",
+    "Código de Conversão": "NT-20422.116"
+  },
+  {
+    "Produto": "RA32629",
+    "Código de Conversão": "NT-20576.132"
+  },
+  {
+    "Produto": "RA32731",
+    "Código de Conversão": "NT-2297.523"
+  },
+  {
+    "Produto": "RA32733",
+    "Código de Conversão": "NT-7137.523"
+  },
+  {
+    "Produto": "RA32734",
+    "Código de Conversão": "NT-2299.122"
+  },
+  {
+    "Produto": "RA32737",
+    "Código de Conversão": "NT-2856.122"
+  },
+  {
+    "Produto": "RA32738",
+    "Código de Conversão": "NT-20016.126"
+  },
+  {
+    "Produto": "RA32751",
+    "Código de Conversão": "NT-7140.116"
+  },
+  {
+    "Produto": "RA32771",
+    "Código de Conversão": "NT-3374.126"
+  },
+  {
+    "Produto": "RA32801",
+    "Código de Conversão": "NT-20064.122"
+  },
+  {
+    "Produto": "RA32903",
+    "Código de Conversão": "NT-4643.523"
+  },
+  {
+    "Produto": "RA32905",
+    "Código de Conversão": "BT-4644.523"
+  },
+  {
+    "Produto": "RA32908",
+    "Código de Conversão": "NT-20015.116"
+  },
+  {
+    "Produto": "RA39205",
+    "Código de Conversão": "NT-29205.523"
+  }
+]

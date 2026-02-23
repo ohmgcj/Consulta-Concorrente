@@ -9,7 +9,9 @@ import { fileURLToPath } from "url";
 
 // Imports dos providers e serviços
 import * as ikroProvider from "./providers/ikro.provider.js";
+import * as notusProvider from "./providers/notus.provider.js";
 import cacheService from "./services/cache.service.js";
+import mappingService from "./services/mapping.service.js";
 
 // --- CONFIGURAÇÕES ---
 const __filename = fileURLToPath(import.meta.url);
@@ -27,7 +29,7 @@ async function initializeCache() {
   }
 }
 
-// --- ROTA PARA O FRONTEND PEGAR OS REGULADORES ---
+// --- ROTA PARA O FRONTEND - IKRO ---
 app.get("/api/reguladores", (req, res) => {
   if (cacheService.isReady("reguladores")) {
     res.json(cacheService.getReguladores());
@@ -66,6 +68,68 @@ app.get("/api/regulador-detalhes", async (req, res) => {
     console.error("Erro ao buscar detalhes:", error.message);
     res.status(500).json({ message: "Erro ao buscar dados externos" });
   }
+});
+
+// --- ROTAS PARA NOTUS ---
+
+// Busca todos os produtos NOTUS
+app.get("/api/notus", async (req, res) => {
+  try {
+    const products = await notusProvider.fetchNotusProducts();
+    res.json(products);
+  } catch (error) {
+    console.error("Erro ao buscar produtos NOTUS", error.message);
+    res.status(500).json({ message: "Erro ao buscar dados NOTUS" });
+  }
+});
+
+// Busca produtos NOTUS com filtros
+app.get("/api/notus/search", async (req, res) => {
+  try {
+    const filters = req.query;
+    const filtered = await notusProvider.searchNotusProducts(filters);
+    res.json(filtered);
+  } catch (error) {
+    console.error("Erro ao buscar produtos NOTUS com filtros", error.message);
+    res.status(500).json({ message: "Erro ao buscar dados NOTUS" });
+  }
+});
+
+// Produtos NOTUS mapeados (apenas opções que você tem código)
+app.get("/api/notus/mapped", async (req, res) => {
+  try {
+    const products = await notusProvider.fetchNotusProductsMapped();
+    res.json(products);
+  } catch (error) {
+    console.error("Erro ao buscar produtos mapeados", error.message);
+    res.status(500).json({ message: "Erro ao buscar produtos mapeados" });
+  }
+});
+
+// Lacunas: produtos que NOTUS tem mas você NÃO tem código/mapeamento
+app.get("/api/notus/gap", async (req, res) => {
+  try {
+    const gapProducts = await notusProvider.fetchNotusProductsGap();
+    res.json(gapProducts);
+  } catch (error) {
+    console.error("Erro ao analisar lacunas", error.message);
+    res.status(500).json({ message: "Erro ao analisar lacunas" });
+  }
+});
+
+// Info sobre mapeamentos disponíveis
+app.get("/api/mappings/info", (req, res) => {
+  const providers = mappingService.getAvailableProviders();
+  const info = {};
+  
+  providers.forEach((provider) => {
+    const mapping = mappingService.getMappingByProvider(provider);
+    info[provider] = {
+      totalItems: mapping.length,
+    };
+  });
+
+  res.json(info);
 });
 
 // --- SERVIR ARQUIVOS ESTÁTICOS E INICIAR ---
