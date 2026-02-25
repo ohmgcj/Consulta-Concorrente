@@ -7,10 +7,24 @@ class CacheService {
   constructor() {
     this.cache = {
       reguladores: null,
-    };
+      notusProducts: null,
+    }
     this.status = {
-      reguladores: false, // flag para indicar se o cache está pronto
-    };
+      reguladores: false,
+      notusProducts: false,
+    }
+  }
+
+  // Setter para cache de produtos NOTUS
+  setNotusProducts(data) {
+    this.cache.notusProducts = data;
+    this.status.notusProducts = true;
+    console.log("[CACHE] Produtos NOTUS armazenados em memória");
+  }
+
+  // Getter para cache de produtos NOTUS
+  getNotusProducts() {
+    return this.cache.notusProducts;
   }
 
   // Setter para cache de reguladores

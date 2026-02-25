@@ -21,10 +21,16 @@
     <!-- CONTEÚDO -->
     <main class="flex-grow flex items-start justify-center p-6">
       <div class="w-full max-w-4xl">
+        <!-- Abas de seleção de pesquisa -->
+        <div class="flex border-b mb-6">
+          <button id="search-tab-ikro" class="px-4 py-2 font-medium text-[#cd9931] border-b-2 border-[#cd9931] focus:outline-none">IKRO</button>
+          <button id="search-tab-notus" class="px-4 py-2 font-medium text-gray-500 border-b-2 border-transparent focus:outline-none">NOTUS</button>
+        </div>
+
         <!-- CARD BUSCA -->
-        <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+        <div id="ikro-search-card" class="bg-white p-6 rounded-xl shadow-md mb-6">
           <h2 class="text-lg font-semibold mb-4 pb-2 border-b-2 border-[#cd9931] text-[#2e2e2e]">
-            Consulta de Produto
+            Consulta de Produto IKRO
           </h2>
 
           <div class="flex gap-3">
@@ -43,6 +49,30 @@
           </div>
 
           <p id="status-message" class="text-sm text-gray-500 mt-3">
+            Carregando dados...
+          </p>
+        </div>
+        <div id="notus-search-card" class="bg-white p-6 rounded-xl shadow-md mb-6 hidden">
+          <h2 class="text-lg font-semibold mb-4 pb-2 border-b-2 border-[#cd9931] text-[#2e2e2e]">
+            Consulta de Produto NOTUS
+          </h2>
+
+          <div class="flex gap-3">
+            <input
+              type="text"
+              id="notusSearchInput"
+              placeholder="Digite o código NOTUS..."
+              class="flex-grow px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+            <button
+              id="notusSearchButton"
+              class="bg-[#cd9931] hover:bg-[#b88322] text-white px-6 py-2 rounded-xl transition font-medium shadow-md"
+            >
+              Buscar
+            </button>
+          </div>
+
+          <p id="notus-status-message" class="text-sm text-gray-500 mt-3">
             Carregando dados...
           </p>
         </div>
@@ -93,6 +123,18 @@
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Abas dos concorrentes -->
+          <div class="mt-8 hidden">
+            <div class="flex border-b mb-4">
+              <button id="tab-ikro" class="px-4 py-2 font-medium text-[#cd9931] border-b-2 border-[#cd9931] focus:outline-none">IKRO</button>
+              <button id="tab-notus" class="px-4 py-2 font-medium text-gray-500 border-b-2 border-transparent focus:outline-none">NOTUS</button>
+              <button id="tab-notus-mapping" class="px-4 py-2 font-medium text-gray-500 border-b-2 border-transparent focus:outline-none">NOTUS Mapping</button>
+            </div>
+            <div id="ikro-container" class="bg-gray-50 p-4 rounded-lg border-t-4 border-[#cd9931]"></div>
+            <div id="notus-container" class="bg-gray-50 p-4 rounded-lg border-t-4 border-[#cd9931] hidden"></div>
+            <div id="notus-mapping-container" class="bg-gray-50 p-4 rounded-lg border-t-4 border-[#cd9931] hidden"></div>
           </div>
         </div>
       </div>
@@ -199,8 +241,6 @@
           productSpecification.textContent = "Sem especificação.";
         }
 
-        console.log(attrs);
-
         // PREÇO (vem do endpoint principal)
         productPrice.textContent = attrs.preco_bruto
           ? Number(attrs.preco_bruto).toLocaleString("pt-BR", {
@@ -247,10 +287,168 @@
               "<li>Erro ao carregar aplicações.</li>";
           });
 
+        // --- Concorrentes ---
+        preencherConcorrenteAbas(userInput);
+
         resultContainer.classList.remove("hidden");
         statusMessage.textContent = "";
       }
 
+      // Função para preencher abas dos concorrentes
+      function preencherConcorrenteAbas(codigo) {
+        // IKRO
+        const ikroMapping = codeMapping.find(
+          (item) => String(item.meu_codigo) === codigo
+        );
+        const ikroContainer = document.getElementById("ikro-container");
+        ikroContainer.innerHTML = ikroMapping
+          ? `<div class='text-sm'><strong>IKRO:</strong> ${ikroMapping.codigo_api}</div>`
+          : `<span class='text-sm text-gray-400'>Sem equivalente IKRO</span>`;
+
+        // NOTUS
+        const notusContainer = document.getElementById("notus-container");
+        fetch(`/api/notus/mapping?codigo=${codigo}`)
+          .then(res => {
+            if (!res.ok) return null;
+            return res.json();
+          })
+          .then(notusItem => {
+            if (notusItem && notusItem["Código de Conversão"]) {
+              notusContainer.innerHTML = `<div class='text-sm'><strong>NOTUS:</strong> ${notusItem["Código de Conversão"]}</div>`;
+            } else {
+              notusContainer.innerHTML = `<span class='text-sm text-gray-400'>Sem equivalente NOTUS</span>`;
+            }
+          })
+          .catch(() => {
+            notusContainer.innerHTML = `<span class='text-sm text-gray-400'>Erro ao carregar NOTUS</span>`;
+          });
+
+        // NOTUS Mapping (produto completo)
+        const notusMappingContainer = document.getElementById("notus-mapping-container");
+        notusMappingContainer.innerHTML = "<div class='text-sm text-gray-400'>Carregando produto NOTUS...</div>";
+        fetch(`/api/notus/by-mapping?codigo=${codigo}`)
+          .then(res => {
+            if (!res.ok) return null;
+            return res.json();
+          })
+          .then(produto => {
+            if (produto && produto.codigo) {
+              notusMappingContainer.innerHTML = `
+                <div class='text-sm'>
+                  <strong>Código:</strong> ${produto.codigo}<br>
+                  <strong>Grupo:</strong> ${produto.grupo}<br>
+                  <strong>Categoria:</strong> ${produto.categoria}<br>
+                  <strong>Montadora:</strong> ${produto.montadora}<br>
+                  <strong>Modelo:</strong> ${produto.modelo}<br>
+                  <strong>Ano:</strong> ${produto.ano}<br>
+                  <strong>Descrição:</strong> ${produto.descricao}<br>
+                  <strong>Imagem:</strong> <img src="${produto.imagem}" alt="Imagem NOTUS" style="max-width:200px;max-height:120px;" />
+                </div>
+              `;
+            } else {
+              notusMappingContainer.innerHTML = `<span class='text-sm text-gray-400'>Produto NOTUS não encontrado</span>`;
+            }
+          })
+          .catch(() => {
+            notusMappingContainer.innerHTML = `<span class='text-sm text-gray-400'>Erro ao carregar produto NOTUS</span>`;
+          });
+      }
+
+      // Alterna abas de pesquisa
+      function showSearchTab(tab) {
+        const ikroTab = document.getElementById("search-tab-ikro");
+        const notusTab = document.getElementById("search-tab-notus");
+        const ikroCard = document.getElementById("ikro-search-card");
+        const notusCard = document.getElementById("notus-search-card");
+
+        if (tab === "ikro") {
+          ikroTab.classList.add("text-[#cd9931]", "border-[#cd9931]");
+          ikroTab.classList.remove("text-gray-500", "border-transparent");
+          notusTab.classList.add("text-gray-500", "border-transparent");
+          notusTab.classList.remove("text-[#cd9931]", "border-[#cd9931]");
+          ikroCard.classList.remove("hidden");
+          notusCard.classList.add("hidden");
+        } else {
+          notusTab.classList.add("text-[#cd9931]", "border-[#cd9931]");
+          notusTab.classList.remove("text-gray-500", "border-transparent");
+          ikroTab.classList.add("text-gray-500", "border-transparent");
+          ikroTab.classList.remove("text-[#cd9931]", "border-[#cd9931]");
+          notusCard.classList.remove("hidden");
+          ikroCard.classList.add("hidden");
+        }
+      }
+
+      // Eventos
+      searchButton.addEventListener("click", buscarProduto);
+      searchInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") buscarProduto();
+      });
+
+      // Busca NOTUS
+      function buscarProdutoNotus() {
+        const userInput = document.getElementById("notusSearchInput").value.trim();
+        const statusMessage = document.getElementById("notus-status-message");
+        const resultContainer = document.getElementById("result-container");
+
+        if (!userInput) return;
+
+        statusMessage.textContent = "Carregando dados...";
+
+        // Busca mapeamento NOTUS
+        fetch(`/api/notus/by-mapping?codigo=${userInput}`)
+          .then(res => {
+            if (!res.ok) return null;
+            return res.json();
+          })
+          .then(produto => {
+            if (produto && produto.codigo) {
+              // Exibe resultado
+              resultContainer.classList.remove("hidden");
+              document.getElementById("product-title").textContent = produto.codigo;
+              document.getElementById("product-line").textContent = produto.linha || "-";
+              document.getElementById("product-group").textContent = produto.grupo || "-";
+              document.getElementById("product-item").textContent = produto.categoria || "-";
+              document.getElementById("product-price").textContent = produto.preco_bruto ? produto.preco_bruto : "-";
+              document.getElementById("product-specification").textContent = produto.descricao || "-";
+              // Imagem
+              if (produto.imagem) {
+                let imgUrl = produto.imagem;
+                if (imgUrl.startsWith("./")) {
+                  imgUrl = "https://catalogo.notus.ind.br" + imgUrl.slice(1);
+                }
+                document.getElementById("product-image").src = imgUrl;
+                document.getElementById("product-image").classList.remove("hidden");
+                document.getElementById("image-placeholder").classList.add("hidden");
+              } else {
+                document.getElementById("product-image").classList.add("hidden");
+                document.getElementById("image-placeholder").classList.remove("hidden");
+              }
+              // Aplicações
+              document.getElementById("product-application").innerHTML = "<li>Sem aplicações cadastradas.</li>";
+              statusMessage.textContent = "";
+            } else {
+              resultContainer.classList.add("hidden");
+              statusMessage.textContent = "Produto NOTUS não encontrado.";
+            }
+          })
+          .catch(() => {
+            resultContainer.classList.add("hidden");
+            statusMessage.textContent = "Erro ao carregar produto NOTUS.";
+          });
+      }
+
+      document.getElementById("notusSearchButton").addEventListener("click", buscarProdutoNotus);
+      document.getElementById("notusSearchInput").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") buscarProdutoNotus();
+      });
+
+      // Abas concorrentes
+      document.getElementById("search-tab-ikro").addEventListener("click", () => showSearchTab("ikro"));
+      document.getElementById("search-tab-notus").addEventListener("click", () => showSearchTab("notus"));
+      document.getElementById("tab-ikro").addEventListener("click", () => showTab("ikro"));
+      document.getElementById("tab-notus").addEventListener("click", () => showTab("notus"));
+      document.getElementById("tab-notus-mapping").addEventListener("click", () => showTab("notus-mapping"));
+      
       // Eventos
       searchButton.addEventListener("click", buscarProduto);
       searchInput.addEventListener("keypress", (e) => {

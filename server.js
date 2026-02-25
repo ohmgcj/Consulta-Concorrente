@@ -24,6 +24,9 @@ async function initializeCache() {
   try {
     const reguladores = await ikroProvider.fetchIkroReguladores();
     cacheService.setReguladores(reguladores);
+    // Inicializa cache NOTUS
+    const notusProducts = await notusProvider.fetchNotusProducts();
+    cacheService.setNotusProducts(notusProducts);
   } catch (error) {
     console.error("[SERVER] ERRO ao inicializar cache:", error.message);
   }
@@ -71,6 +74,21 @@ app.get("/api/regulador-detalhes", async (req, res) => {
 });
 
 // --- ROTAS PARA NOTUS ---
+// Busca mapeamento NOTUS por código
+app.get("/api/notus/mapping", (req, res) => {
+  const codigo = req.query.codigo;
+  if (!codigo) {
+    return res.status(400).json({ message: "Código é obrigatório" });
+  }
+  // Busca pelo campo "Código de Conversão"
+  const mapping = mappingService.getMappingByProvider("notus");
+  const item = mapping.find((m) => String(m["Código de Conversão"]) === String(codigo));
+  if (item) {
+    return res.json(item);
+  } else {
+    return res.status(404).json({ message: "Não encontrado" });
+  }
+});
 
 // Busca todos os produtos NOTUS
 app.get("/api/notus", async (req, res) => {
@@ -107,6 +125,30 @@ app.get("/api/notus/mapped", async (req, res) => {
 });
 
 // Lacunas: produtos que NOTUS tem mas você NÃO tem código/mapeamento
+// Busca produto NOTUS pelo código interno (referência de mapeamento)
+app.get("/api/notus/by-mapping", (req, res) => {
+  const codigoInterno = req.query.codigo;
+  if (!codigoInterno) {
+    return res.status(400).json({ message: "Código interno é obrigatório" });
+  }
+  // Busca mapeamento
+  const mapping = mappingService.getMappingByProvider("notus");
+  const mapItem = mapping.find(m => String(m.Produto) === String(codigoInterno));
+  if (!mapItem) {
+    return res.status(404).json({ message: "Não encontrado no mapping" });
+  }
+  // Busca produto NOTUS pelo código de conversão
+  const notusProducts = cacheService.getNotusProducts();
+  if (!notusProducts) {
+    return res.status(503).json({ message: "Produtos NOTUS não carregados" });
+  }
+  const produto = notusProducts.find(p => String(p.codigo) === String(mapItem["Código de Conversão"]));
+  if (produto) {
+    return res.json(produto);
+  } else {
+    return res.status(404).json({ message: "Produto NOTUS não encontrado" });
+  }
+});
 app.get("/api/notus/gap", async (req, res) => {
   try {
     const gapProducts = await notusProvider.fetchNotusProductsGap();

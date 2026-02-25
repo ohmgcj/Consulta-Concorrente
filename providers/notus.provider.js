@@ -1,37 +1,21 @@
-// Busca produto Notus na API usando Código de Conversão do mapeamento
-export async function fetchNotusProductByProduto(produto) {
-  // Busca código de conversão no mapeamento
-  const codigoConversao = mappingService.findCodigoConversaoByProduto("notus", produto);
-  if (!codigoConversao) {
-    console.warn(`[NOTUS] Código de conversão não encontrado para produto: ${produto}`);
-    return null;
-  }
-  // Busca produto na API
-  try {
-    const products = await fetchNotusProducts();
-    // Busca pelo campo correspondente
-    const found = products.find((p) => String(p.codigo) === String(codigoConversao));
-    if (!found) {
-      console.warn(`[NOTUS] Produto não encontrado na API para código: ${codigoConversao}`);
-    }
-    return found || null;
-  } catch (error) {
-    console.error("[NOTUS] ERRO ao buscar produto por código de conversão:", error.message);
-    throw error;
-  }
-}
 import axios from "axios";
 import mappingService from "../services/mapping.service.js";
 
 const NOTUS_URL = "https://catalogo.notus.ind.br/conversor/produtos.json";
+import cacheService from "../services/cache.service.js";
 
 // Carrega todos os produtos da NOTUS
 export async function fetchNotusProducts() {
-  console.log("[NOTUS] Iniciando carregamento de produtos...");
+  // Verifica cache
+  if (cacheService.isReady("notusProducts")) {
+    return cacheService.getNotusProducts();
+  }
 
+  console.log("[NOTUS] Iniciando carregamento de produtos...");
   try {
     const response = await axios.get(NOTUS_URL);
     console.log(`[NOTUS] ${response.data.length} produtos carregados.`);
+    cacheService.setNotusProducts(response.data);
     return response.data;
   } catch (error) {
     console.error("[NOTUS] ERRO ao buscar produtos:", error.message);
@@ -49,13 +33,14 @@ export async function fetchNotusProductsMapped() {
 
     if (mapping.length === 0) {
       console.warn("[NOTUS] Nenhum mapeamento encontrado para NOTUS");
-      return allProducts;
+      return [];
     }
 
-    // Filtra apenas produtos que têm mapeamento
-    const mapped = allProducts.filter((product) =>
-      mapping.some((m) => String(m.notus_id) === String(product.id))
-    );
+    // Cria um Set com todos os códigos de conversão do mapping
+    const mappedCodes = new Set(mapping.map(m => String(m["Código de Conversão"])));
+
+    // Filtra apenas produtos que têm mapeamento pelo campo 'codigo'
+    const mapped = allProducts.filter(product => mappedCodes.has(String(product.codigo)));
 
     console.log(`[NOTUS] ${mapped.length} produtos mapeados de ${allProducts.length}`);
     return mapped;
@@ -73,8 +58,11 @@ export async function fetchNotusProductsGap() {
     const allProducts = await fetchNotusProducts();
     const mapping = mappingService.getMappingByProvider("notus");
 
-    const mappedIds = new Set(mapping.map((m) => String(m.notus_id)));
-    const gapProducts = allProducts.filter((product) => !mappedIds.has(String(product.id)));
+    // Cria um Set com todos os códigos de conversão do mapping
+    const mappedCodes = new Set(mapping.map(m => String(m["Código de Conversão"])));
+
+    // Filtra produtos que NÃO têm mapeamento pelo campo 'codigo'
+    const gapProducts = allProducts.filter(product => !mappedCodes.has(String(product.codigo)));
 
     console.log(`[NOTUS] ${gapProducts.length} produtos sem mapeamento de ${allProducts.length}`);
     return gapProducts;

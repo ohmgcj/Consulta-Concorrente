@@ -45,13 +45,6 @@ class MappingService {
     return mapping.find((item) => String(item.meu_codigo) === String(meuCodigo));
   }
 
-    // Buscar Código de Conversão pelo Produto (Notus)
-    findCodigoConversaoByProduto(provider, produto) {
-      const mapping = this.mappings[provider] || [];
-      const item = mapping.find((m) => String(m.Produto) === String(produto));
-      return item ? item["Código de Conversão"] : null;
-    }
-
   // Buscar todos os itens de um provider que correspondem a um código externo
   findByProviderCode(provider, codigoExterno, field = "codigo_api") {
     const mapping = this.mappings[provider] || [];
