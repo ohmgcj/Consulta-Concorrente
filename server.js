@@ -1,6 +1,7 @@
 // =================================================================
 // server.js
-// Roteamento e configuração Express
+// Servidor Express: Roteamento, Orquestração e Cache
+// Conecta frontend (js/api/backend.api.js) com providers externos
 // =================================================================
 
 import express from "express";
@@ -19,7 +20,12 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3000;
 
-// --- FUNÇÃO PARA BUSCAR E CACHEAR OS REGULADORES ---
+/**
+ * Inicializa cache populando dados de APIs externas
+ * Executado no startup do servidor
+ * @async
+ * @throws {Error} Se falhar buscar dados de IKRO ou NOTUS
+ */
 async function initializeCache() {
   try {
     const reguladores = await ikroProvider.fetchIkroReguladores();
@@ -32,7 +38,14 @@ async function initializeCache() {
   }
 }
 
-// --- ROTA PARA O FRONTEND - IKRO ---
+// --- ROTAS IKRO ---
+
+/**
+ * GET /api/reguladores
+ * Retorna lista de reguladores do cache (populado no startup)
+ * @route GET /api/reguladores
+ * @returns {Array} Array de reguladores IKRO ou erro 503 se cache não pronto
+ */
 app.get("/api/reguladores", (req, res) => {
   if (cacheService.isReady("reguladores")) {
     res.json(cacheService.getReguladores());
@@ -43,25 +56,24 @@ app.get("/api/reguladores", (req, res) => {
   }
 });
 
-// --- ROTA PARA DETALHES + APLICAÇÃO (com parâmetros na URL) ---
-app.get("/api/regulador/:grupo/:item", async (req, res) => {
-  const { grupo, item } = req.params;
-
-  try {
-    const data = await ikroProvider.fetchIkroDetalheEAplicacao(grupo, item);
-    res.json(data);
-  } catch (error) {
-    console.error("Erro ao buscar detalhes/aplicação", error.message);
-    res.status(500).json({ message: "Erro ao buscar dados externos" });
-  }
-});
-
-// --- ROTA PARA DETALHES + APLICAÇÃO (com query string) ---
+/**
+ * GET /api/regulador-detalhes
+ * Busca detalhes + aplicações de um regulador específico
+ * @route GET /api/regulador-detalhes?grupo=40201&item=0001
+ * @param {string} grupo - Código do grupo (obrigatório, dígitos)
+ * @param {string} item - Código do item (obrigatório, dígitos)
+ * @returns {Object} {detalhe: Array, aplicacao: Array}
+ */
 app.get("/api/regulador-detalhes", async (req, res) => {
   const { grupo, item } = req.query;
 
   if (!grupo || !item) {
     return res.status(400).json({ message: "Grupo e item são obrigatórios" });
+  }
+
+  // Validação básica: grupo e item devem ser strings numéricas
+  if (!/^\d+$/.test(grupo) || !/^\d+$/.test(item)) {
+    return res.status(400).json({ message: "Grupo e item devem conter apenas dígitos" });
   }
 
   try {
@@ -177,7 +189,7 @@ app.get("/api/mappings/info", (req, res) => {
 // --- SERVIR ARQUIVOS ESTÁTICOS E INICIAR ---
 app.use(express.static(__dirname));
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Servidor rodando! Acesse a aplicação em http://localhost:${PORT}`);
-  initializeCache();
+  await initializeCache();
 });

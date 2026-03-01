@@ -1,10 +1,21 @@
+// =================================================================
+// providers/notus.provider.js
+// Responsável apenas por buscar dados da NOTUS
+// Abstrai chamadas HTTP para API externa NOTUS
+// =================================================================
+
 import axios from "axios";
 import mappingService from "../services/mapping.service.js";
-
-const NOTUS_URL = "https://catalogo.notus.ind.br/conversor/produtos.json";
 import cacheService from "../services/cache.service.js";
 
-// Carrega todos os produtos da NOTUS
+const NOTUS_URL = "https://catalogo.notus.ind.br/conversor/produtos.json";
+
+/**
+ * Carrega todos os produtos da NOTUS (com suporte a cache)
+ * @async
+ * @returns {Promise<Array>} Array de produtos NOTUS
+ * @throws {Error} Se falhar a requisição HTTP
+ */
 export async function fetchNotusProducts() {
   // Verifica cache
   if (cacheService.isReady("notusProducts")) {
@@ -23,7 +34,12 @@ export async function fetchNotusProducts() {
   }
 }
 
-// Busca produtos NOTUS mapeados para meus códigos
+/**
+ * Busca produtos NOTUS que têm correspondência no mapeamento local
+ * @async
+ * @returns {Promise<Array>} Produtos mapeados de NOTUS
+ * @throws {Error} Se falhar a requisição
+ */
 export async function fetchNotusProductsMapped() {
   console.log("[NOTUS] Buscando produtos mapeados...");
 
@@ -50,7 +66,12 @@ export async function fetchNotusProductsMapped() {
   }
 }
 
-// Encontra lacunas: produtos que NOTUS tem mas você não tem mapeamento
+/**
+ * Encontra lacunas: produtos que NOTUS tem mas você não tem mapeamento
+ * @async
+ * @returns {Promise<Array>} Produtos sem mapeamento
+ * @throws {Error} Se falhar a requisição
+ */
 export async function fetchNotusProductsGap() {
   console.log("[NOTUS] Analisando lacunas de catálogo...");
 
@@ -72,7 +93,13 @@ export async function fetchNotusProductsGap() {
   }
 }
 
-// Busca produto NOTUS específico por ID
+/**
+ * Busca produto NOTUS específico por ID
+ * @async
+ * @param {number|string} id - ID do produto NOTUS
+ * @returns {Promise<Object|undefined>} Produto encontrado ou undefined
+ * @throws {Error} Se falhar a requisição
+ */
 export async function fetchNotusProductById(id) {
   console.log(`[NOTUS] Buscando produto ID ${id}...`);
 
@@ -85,7 +112,13 @@ export async function fetchNotusProductById(id) {
   }
 }
 
-// Busca produtos NOTUS por filtros múltiplos
+/**
+ * Busca produtos NOTUS com múltiplos filtros e/ou
+ * @async
+ * @param {Object} filters - Objeto com pares chave-valor para filtrar
+ * @returns {Promise<Array>} Produtos que correspondem aos filtros
+ * @throws {Error} Se falhar a requisição
+ */
 export async function searchNotusProducts(filters = {}) {
   console.log("[NOTUS] Buscando produtos com filtros...", filters);
 

@@ -1,6 +1,7 @@
 // =================================================================
 // providers/ikro.provider.js
 // Responsável apenas por buscar dados da IKRO
+// Abstrai chamadas HTTP para APIs externas IKRO
 // =================================================================
 
 import axios from "axios";
@@ -13,7 +14,13 @@ const URLS = {
   APLICACAO: "https://adm.ikro.com.br/api/aplicacao-produtos",
 };
 
-// Função auxiliar para buscar com paginação
+/**
+ * Busca com suporte a paginação automática
+ * @async
+ * @param {string} baseUrl - URL base com filtros
+ * @returns {Promise<Array>} Array consolidado de todos os produtos
+ * @private
+ */
 async function fetchWithPagination(baseUrl) {
   let products = [];
   let page = 1;
@@ -37,7 +44,12 @@ async function fetchWithPagination(baseUrl) {
   return products;
 }
 
-// Busca reguladores com paginação
+/**
+ * Busca reguladores de tensão com paginação automática
+ * @async
+ * @returns {Promise<Array>} Array de reguladores com estrutura IKRO (id, attributes)
+ * @throws {Error} Se falhar a requisição com IKRO
+ */
 export async function fetchIkroReguladores() {
   console.log("[IKRO] Iniciando carregamento de reguladores...");
 
@@ -51,7 +63,14 @@ export async function fetchIkroReguladores() {
   }
 }
 
-// Busca detalhes de um produto específico
+/**
+ * Busca detalhes de um produto específico (alternadores, referências)
+ * @async
+ * @param {string} grupo - Código do grupo (ex: "40103")
+ * @param {string} item - Código do item (ex: "0234")
+ * @returns {Promise<Array>} Array de detalhes com alternadores
+ * @throws {Error} Se falhar a requisição
+ */
 export async function fetchIkroDetalhes(grupo, item) {
   console.log(`[IKRO] Buscando detalhes para grupo=${grupo}, item=${item}`);
 
@@ -65,7 +84,14 @@ export async function fetchIkroDetalhes(grupo, item) {
   }
 }
 
-// Busca aplicações de um produto específico
+/**
+ * Busca aplicações automotivas de um produto
+ * @async
+ * @param {string} grupo - Código do grupo (ex: "40201")
+ * @param {string} item - Código do item (ex: "0001")
+ * @returns {Promise<Array>} Array de aplicações (marca, modelo, motor, etc)
+ * @throws {Error} Se falhar a requisição
+ */
 export async function fetchIkroAplicacao(grupo, item) {
   console.log(`[IKRO] Buscando aplicações para grupo=${grupo}, item=${item}`);
 
@@ -79,7 +105,14 @@ export async function fetchIkroAplicacao(grupo, item) {
   }
 }
 
-// Busca detalhes e aplicações simultaneamente
+/**
+ * Busca detalhes e aplicações simultaneamente (Promise.all)
+ * @async
+ * @param {string} grupo - Código do grupo
+ * @param {string} item - Código do item
+ * @returns {Promise<Object>} Objeto {detalhe: Array, aplicacao: Array}
+ * @throws {Error} Se qualquer requisição falhar
+ */
 export async function fetchIkroDetalheEAplicacao(grupo, item) {
   console.log(`[IKRO] Buscando detalhes + aplicações para grupo=${grupo}, item=${item}`);
 

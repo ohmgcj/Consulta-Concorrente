@@ -1,6 +1,7 @@
 // =================================================================
 // services/mapping.service.js
 // Carrega e gerencia mapeamentos entre sistemas
+// Implementa padrão Singleton
 // =================================================================
 
 import fs from "fs";
@@ -10,13 +11,21 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MAPPINGS_DIR = path.join(__dirname, "..", "mappings");
 
+/**
+ * Serviço de Mapeamento
+ * Singleton que gerencia mapeamentos entre códigos internos e externos
+ */
 class MappingService {
   constructor() {
     this.mappings = {};
     this.loadAllMappings();
   }
 
-  // Carrega todos os mapeamentos na inicialização
+  /**
+   * Carrega todos os arquivos .mapping.json do diretório mappings/
+   * Executado na inicialização
+   * @private
+   */
   loadAllMappings() {
     try {
       const files = fs.readdirSync(MAPPINGS_DIR);
@@ -34,29 +43,50 @@ class MappingService {
     }
   }
 
-  // Buscar mapeamento de um provider específico
+  /**
+   * Busca mapeamento de um provider específico
+   * @param {string} provider - Nome do provider ("ikro", "notus", etc)
+   * @returns {Array} Array de items mapeados ou array vazio se não encontrar
+   */
   getMappingByProvider(provider) {
     return this.mappings[provider] || [];
   }
 
-  // Buscar item específico pelo "meu_código"
+  /**
+   * Busca item específico pelo "meu_código"
+   * @param {string} provider - Nome do provider
+   * @param {string|number} meuCodigo - Código interno
+   * @returns {Object|undefined} Item encontrado ou undefined
+   */
   findByMeuCodigo(provider, meuCodigo) {
     const mapping = this.mappings[provider] || [];
     return mapping.find((item) => String(item.meu_codigo) === String(meuCodigo));
   }
 
-  // Buscar todos os itens de um provider que correspondem a um código externo
+  /**
+   * Busca todos os items de um provider que correspondem a um código externo
+   * @param {string} provider - Nome do provider
+   * @param {string|number} codigoExterno - Código a buscar
+   * @param {string} field - Campo a comparar (default: "codigo_api")
+   * @returns {Array} Items encontrados
+   */
   findByProviderCode(provider, codigoExterno, field = "codigo_api") {
     const mapping = this.mappings[provider] || [];
     return mapping.filter((item) => String(item[field]) === String(codigoExterno));
   }
 
-  // Listar todos os providers disponíveis
+  /**
+   * Lista todos os providers com mapeamentos carregados
+   * @returns {Array<string>} Nomes dos providers (ex: ["ikro", "notus"])
+   */
   getAvailableProviders() {
     return Object.keys(this.mappings);
   }
 
-  // Recarregar mapeamentos (útil se o arquivo mudar em runtime)
+  /**
+   * Recarrega mapeamentos (útil se arquivo mudou em runtime)
+   * Limpa cache e recarrega arquivos do disco
+   */
   reloadMappings() {
     this.mappings = {};
     this.loadAllMappings();
