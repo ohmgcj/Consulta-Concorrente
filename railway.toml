@@ -1,4 +1,5 @@
-{{/* Railway.toml - Configuração para Railway.app */}}
+# Railway.toml - Configuração para Railway.app
+
 [build]
 builder = "nixpacks"
 
