@@ -9,6 +9,10 @@ Dados/*.xlsx
 # Ignore arquivos temporários, logs, etc
 *.log
 .DS_Store
+
 # Arquivos de referência técnica (não versionados)
 MODELO\ API.md
 ANALISE_DUPLICACAO.md
+REFERENCIA_APIS.md
+NOTUS_TEST.md
+AUDITORIA_FINAL.md
