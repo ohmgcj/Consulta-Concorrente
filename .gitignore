@@ -1,6 +1,11 @@
 # Ignore node modules
 node_modules/
 
+# Ignore variáveis de ambiente
+.env
+.env.local
+.env.*.local
+
 # Ignore dados sensíveis
 Dados/*.csv
 Dados/*.xls

@@ -1,0 +1,15 @@
+{{/* Railway.toml - Configuração para Railway.app */}}
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "npm install && node server.js"
+restartPolicyType = "always"
+restartPolicyMaxRetries = 5
+
+[env]
+NODE_ENV = "production"
+LOG_LEVEL = "info"
+
+# Aumentar timeout para inicializar cache
+# (IKRO + NOTUS podem levar alguns segundos)

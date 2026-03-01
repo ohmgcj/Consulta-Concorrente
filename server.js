@@ -7,6 +7,10 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+
+// Carregar variáveis de ambiente
+dotenv.config();
 
 // Imports dos providers e serviços
 import * as ikroProvider from "./providers/ikro.provider.js";
@@ -19,7 +23,8 @@ import gapAnalysisService from "./services/gap-analysis.service.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Middleware para aceitar JSON
 app.use(express.json());
@@ -242,6 +247,8 @@ app.get("/api/mappings/info", (req, res) => {
 app.use(express.static(__dirname));
 
 app.listen(PORT, async () => {
-  console.log(`Servidor rodando! Acesse a aplicação em http://localhost:${PORT}`);
+  console.log(`[SERVER] Iniciando em ${NODE_ENV}`);
+  console.log(`[SERVER] Porta: ${PORT}`);
+  console.log(`[SERVER] URL: ${NODE_ENV === 'production' ? process.env.APP_URL || 'https://seu-app.railway.app' : `http://localhost:${PORT}`}`);
   await initializeCache();
 });

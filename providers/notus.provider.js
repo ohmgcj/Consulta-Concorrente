@@ -8,7 +8,16 @@ import axios from "axios";
 import mappingService from "../services/mapping.service.js";
 import cacheService from "../services/cache.service.js";
 
-const NOTUS_URL = "https://catalogo.notus.ind.br/conversor/produtos.json";
+const NOTUS_URL = process.env.NOTUS_API_URL || "https://catalogo.notus.ind.br/conversor/produtos.json";
+const REQUEST_TIMEOUT = parseInt(process.env.REQUEST_TIMEOUT || "15000");
+
+// Cliente Axios com timeout
+const axiosInstance = axios.create({
+  timeout: REQUEST_TIMEOUT,
+  headers: {
+    'User-Agent': 'IkroApiTest/1.0.0'
+  }
+});
 
 /**
  * Carrega todos os produtos da NOTUS (com suporte a cache)
@@ -24,7 +33,7 @@ export async function fetchNotusProducts() {
 
   console.log("[NOTUS] Iniciando carregamento de produtos...");
   try {
-    const response = await axios.get(NOTUS_URL);
+    const response = await axiosInstance.get(NOTUS_URL);
     console.log(`[NOTUS] ${response.data.length} produtos carregados.`);
     cacheService.setNotusProducts(response.data);
     return response.data;

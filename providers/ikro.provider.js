@@ -6,13 +6,24 @@
 
 import axios from "axios";
 
-// URLs base da IKRO
+// URLs base da IKRO (via variáveis de ambiente)
+const IKRO_BASE = process.env.IKRO_API_BASE || "https://adm.ikro.com.br/api";
+const REQUEST_TIMEOUT = parseInt(process.env.REQUEST_TIMEOUT || "15000");
+
 const URLS = {
-  BASE: "https://adm.ikro.com.br/api",
-  REGULADORES: "https://adm.ikro.com.br/api/produtos?filters[descr_linha][$eq]=REGULADORES%20DE%20TENS%C3%83O",
-  DETALHES: "https://adm.ikro.com.br/api/produto-conjuntos",
-  APLICACAO: "https://adm.ikro.com.br/api/aplicacao-produtos",
+  BASE: IKRO_BASE,
+  REGULADORES: `${IKRO_BASE}/produtos?filters[descr_linha][$eq]=REGULADORES%20DE%20TENS%C3%83O`,
+  DETALHES: `${IKRO_BASE}/produto-conjuntos`,
+  APLICACAO: `${IKRO_BASE}/aplicacao-produtos`,
 };
+
+// Cliente Axios com timeout
+const axiosInstance = axios.create({
+  timeout: REQUEST_TIMEOUT,
+  headers: {
+    'User-Agent': 'IkroApiTest/1.0.0'
+  }
+});
 
 /**
  * Busca com suporte a paginação automática
@@ -28,7 +39,7 @@ async function fetchWithPagination(baseUrl) {
 
   while (page <= pageCount) {
     const url = `${baseUrl}&pagination[page]=${page}&pagination[pageSize]=100&populate=imagem`;
-    const response = await axios.get(url);
+    const response = await axiosInstance.get(url);
 
     if (response.data?.data?.length > 0) {
       products.push(...response.data.data);
@@ -76,7 +87,7 @@ export async function fetchIkroDetalhes(grupo, item) {
 
   try {
     const url = `${URLS.DETALHES}?filters[wpro_grupo][$eq]=${grupo}&filters[wpro_item][$eq]=${item}`;
-    const response = await axios.get(url);
+    const response = await axiosInstance.get(url);
     return response.data?.data || [];
   } catch (error) {
     console.error("[IKRO] ERRO ao buscar detalhes:", error.message);
@@ -97,7 +108,7 @@ export async function fetchIkroAplicacao(grupo, item) {
 
   try {
     const url = `${URLS.APLICACAO}?filters[wpro_grupo][$eq]=${grupo}&filters[wpro_item][$eq]=${item}`;
-    const response = await axios.get(url);
+    const response = await axiosInstance.get(url);
     return response.data?.data || [];
   } catch (error) {
     console.error("[IKRO] ERRO ao buscar aplicações:", error.message);
