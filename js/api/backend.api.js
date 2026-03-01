@@ -64,3 +64,44 @@ export async function fetchApplications(grupo, item) {
   if (!res.ok) throw new Error('Erro ao buscar aplicações IKRO');
   return res.json();
 }
+
+// =====================================================================
+// FUNÇÕES PARA LACUNAS DE MAPEAMENTO NOTUS (Gap Analysis)
+// =====================================================================
+
+/**
+ * Busca lacunas de mapeamento (produtos NOTUS não mapeados)
+ * @async
+ * @param {Object} opcoes - {pagina: 1, itemsPorPagina: 10, codigo: '', categoria: '', ordenar: 'codigo'}
+ * @returns {Promise<Object>} {itens, total, paginas, pagina, itemsPorPagina, stats}
+ * @throws {Error} Se falhar a requisição
+ * @example
+ * const gaps = await fetchGapsAnalysis({pagina: 1, codigo: 'AQ'});
+ */
+export async function fetchGapsAnalysis(opcoes = {}) {
+  const params = new URLSearchParams({
+    pagina: opcoes.pagina || 1,
+    itemsPorPagina: opcoes.itemsPorPagina || 10,
+    codigo: opcoes.codigo || '',
+    categoria: opcoes.categoria || '',
+    ordenar: opcoes.ordenar || 'codigo'
+  });
+
+  const res = await fetch(`/api/notus/gaps-analysis?${params.toString()}`);
+  if (!res.ok) throw new Error('Erro ao buscar gaps de mapeamento');
+  return res.json();
+}
+
+/**
+ * Exporta gaps em formato CSV
+ * @param {string} categoria - Categoria a filtrar (opcional)
+ * @returns {void} Inicia download do arquivo CSV
+ * @example
+ * exportarGapsAnalysisCSV('Motores');
+ */
+export function exportarGapsAnalysisCSV(categoria = '') {
+  const url = categoria 
+    ? `/api/notus/gaps-export?categoria=${encodeURIComponent(categoria)}`
+    : '/api/notus/gaps-export';
+  window.open(url, '_blank');
+}

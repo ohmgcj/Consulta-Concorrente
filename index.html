@@ -136,6 +136,23 @@
             <div id="notus-container" class="bg-gray-50 p-4 rounded-lg border-t-4 border-[#cd9931] hidden"></div>
             <div id="notus-mapping-container" class="bg-gray-50 p-4 rounded-lg border-t-4 border-[#cd9931] hidden"></div>
           </div>
+
+          <!-- Seção de Lacunas de Mapeamento NOTUS (Gap Analysis) -->
+          <div id="gaps-section" class="mt-8 hidden">
+            <div class="flex items-center gap-2 border-b mb-4 pb-2">
+              <h3 class="text-lg font-semibold text-[#2e2e2e]">📊 Oportunidades de Desenvolvimento</h3>
+              <p class="text-xs text-gray-500">(Produtos NOTUS não mapeados no seu catálogo)</p>
+            </div>
+
+            <div id="gaps-filters"></div>
+            <div id="gaps-container" class="bg-gray-50 p-4 rounded-lg border-t-4 border-[#cd9931]"></div>
+
+            <div class="mt-4 flex gap-2 justify-end">
+              <button id="gaps-export-all" class="px-4 py-2 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition">
+                📥 Exportar Tudo (CSV)
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </main>

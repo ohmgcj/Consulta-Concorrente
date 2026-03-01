@@ -9,6 +9,15 @@ let codeMapping = [];
 let notusProducts = [];
 let notusMapping = [];
 
+// Estado das lacunas de mapeamento (Gaps Analysis)
+let gapsState = {
+  pagina: 1,
+  itemsPorPagina: 10,
+  codigo: '',
+  categoria: '',
+  ordenar: 'codigo'
+};
+
 async function loadIkroData() {
   IkroUI.showIkroStatus("Carregando base de dados...");
   try {
@@ -144,6 +153,54 @@ function buscarProdutoNotus() {
   NotusUI.showNotusStatus("");
 }
 
+// =====================================================================
+// FUNÇÕES PARA GAPS DE MAPEAMENTO (Gap Analysis)
+// =====================================================================
+
+/**
+ * Carrega e renderiza os gaps de mapeamento
+ */
+async function carregarGaps() {
+  try {
+    const resultado = await BackendAPI.fetchGapsAnalysis(gapsState);
+    NotusUI.renderGapsAnalysisTable(resultado);
+    
+    // Adicionar listeners de paginação
+    window.addEventListener('gaps-paginate', (e) => {
+      gapsState.pagina = e.detail.pagina;
+      carregarGaps();
+    });
+  } catch (err) {
+    console.error("Erro ao carregar gaps:", err);
+    const container = document.getElementById('gaps-container');
+    if (container) {
+      container.innerHTML = '<p class="text-red-500">Erro ao carregar gaps de mapeamento.</p>';
+    }
+  }
+}
+
+/**
+ * Renderiza e configura filtros de gaps
+ */
+function configurarFiltrosGaps() {
+  NotusUI.renderGapsAnalysisFilters((filtros) => {
+    gapsState = { ...gapsState, ...filtros };
+    carregarGaps();
+  });
+}
+
+/**
+ * Mostra a seção de gaps de mapeamento
+ */
+function mostrarGaps() {
+  const gapsSection = document.getElementById('gaps-section');
+  if (gapsSection) {
+    showElement('gaps-section');
+    configurarFiltrosGaps();
+    carregarGaps();
+  }
+}
+
 // Inicializa eventos e dados IKRO e NOTUS
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -188,5 +245,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     tabNotus.classList.remove("text-gray-500", "border-transparent");
     tabIkro.classList.remove("text-[#cd9931]", "border-b-[#cd9931]");
     tabIkro.classList.add("text-gray-500", "border-transparent");
+    
+    // Mostrar gaps de mapeamento quando aba NOTUS for clicada
+    mostrarGaps();
   });
+
+  // --- EVENTOS DE EXPORTAÇÃO DE GAPS ---
+  const gapsExportAllBtn = document.getElementById("gaps-export-all");
+  const gapsExportPendingBtn = document.getElementById("gaps-export-pending");
+
+  if (gapsExportAllBtn) {
+    gapsExportAllBtn.addEventListener("click", () => {
+      BackendAPI.exportarGapsAnalysisCSV('');
+    });
+  }
+
+  if (gapsExportPendingBtn) {
+    gapsExportPendingBtn.addEventListener("click", () => {
+      BackendAPI.exportarGapsAnalysisCSV('');
+    });
+  }
 });

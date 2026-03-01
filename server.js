@@ -13,12 +13,16 @@ import * as ikroProvider from "./providers/ikro.provider.js";
 import * as notusProvider from "./providers/notus.provider.js";
 import cacheService from "./services/cache.service.js";
 import mappingService from "./services/mapping.service.js";
+import gapAnalysisService from "./services/gap-analysis.service.js";
 
 // --- CONFIGURAÇÕES ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3000;
+
+// Middleware para aceitar JSON
+app.use(express.json());
 
 /**
  * Inicializa cache populando dados de APIs externas
@@ -33,6 +37,9 @@ async function initializeCache() {
     // Inicializa cache NOTUS
     const notusProducts = await notusProvider.fetchNotusProducts();
     cacheService.setNotusProducts(notusProducts);
+    // Inicializa análise de gaps
+    const notusMapping = mappingService.getMappingByProvider('notus');
+    gapAnalysisService.analisarGaps(notusProducts, notusMapping);
   } catch (error) {
     console.error("[SERVER] ERRO ao inicializar cache:", error.message);
   }
@@ -169,6 +176,51 @@ app.get("/api/notus/gap", async (req, res) => {
     console.error("Erro ao analisar lacunas", error.message);
     res.status(500).json({ message: "Erro ao analisar lacunas" });
   }
+});
+
+/**
+ * GET /api/notus/gaps-analysis
+ * Retorna lacunas de mapeamento (produtos NOTUS não mapeados)
+ * @route GET /api/notus/gaps-analysis?pagina=1&itemsPorPagina=10&codigo=AQ&ordenar=codigo
+ * @param {number} pagina - Página (default: 1)
+ * @param {number} itemsPorPagina - Itens por página (default: 10)
+ * @param {string} codigo - Filtro de busca por código ou descrição
+ * @param {string} categoria - Filtro por categoria/linha
+ * @param {string} ordenar - Ordenação: 'codigo', 'descricao', 'preco' (default: 'codigo')
+ * @returns {Object} {itens, total, paginas, pagina, itemsPorPagina, stats}
+ */
+app.get("/api/notus/gaps-analysis", (req, res) => {
+  const pagina = parseInt(req.query.pagina) || 1;
+  const itemsPorPagina = parseInt(req.query.itemsPorPagina) || 10;
+  const codigo = req.query.codigo || '';
+  const categoria = req.query.categoria || '';
+  const ordenar = req.query.ordenar || 'codigo';
+
+  const filtros = { codigo, categoria, ordenar };
+  const resultado = gapAnalysisService.obterGaps(pagina, itemsPorPagina, filtros);
+  const stats = gapAnalysisService.obterEstatisticas();
+
+  res.json({
+    ...resultado,
+    stats
+  });
+});
+
+/**
+ * GET /api/notus/gaps-export
+ * Exporta lacunas em formato CSV
+ * @route GET /api/notus/gaps-export
+ * @route GET /api/notus/gaps-export?categoria=Motores
+ * @param {string} categoria - Filtro de categoria (opcional)
+ * @returns {string} CSV
+ */
+app.get("/api/notus/gaps-export", (req, res) => {
+  const categoria = req.query.categoria || null;
+  const csv = gapAnalysisService.exportarCSV(categoria);
+  
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="notus-gaps-${new Date().toISOString().split('T')[0]}.csv"`);
+  res.send(csv);
 });
 
 // Info sobre mapeamentos disponíveis
