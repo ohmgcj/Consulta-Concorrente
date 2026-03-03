@@ -31,8 +31,8 @@ let gapsState = {
  * @returns {Promise<any>} JSON da resposta
  * @throws {Error} Se falhar após todas tentativas
  */
-async function fetchWithRetry(url, maxRetries = 3) {
-  const delayMs = 1000;
+async function fetchWithRetry(url, maxRetries = 5) {
+  const delayMs = 1500; // 1.5s base
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {

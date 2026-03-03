@@ -37,16 +37,26 @@ app.use(express.json());
  */
 async function initializeCache() {
   try {
+    console.log("[CACHE] Iniciando carregamento de cache...");
     const reguladores = await ikroProvider.fetchIkroReguladores();
+    console.log(`[CACHE] ${reguladores.length} reguladores carregados da API`);
     cacheService.setReguladores(reguladores);
+    
     // Inicializa cache NOTUS
+    console.log("[CACHE] Iniciando carregamento de NOTUS...");
     const notusProducts = await notusProvider.fetchNotusProducts();
+    console.log(`[CACHE] ${notusProducts.length} produtos NOTUS carregados da API`);
     cacheService.setNotusProducts(notusProducts);
+    
     // Inicializa análise de gaps
+    console.log("[CACHE] Iniciando análise de gaps...");
     const notusMapping = mappingService.getMappingByProvider('notus');
     gapAnalysisService.analisarGaps(notusProducts, notusMapping);
+    console.log("[CACHE] ✅ Todos os caches inicializados com sucesso");
   } catch (error) {
-    console.error("[SERVER] ERRO ao inicializar cache:", error.message);
+    console.error("[CACHE] ❌ ERRO ao inicializar cache:", error.message);
+    console.error(error);
+    throw error;
   }
 }
 
@@ -59,19 +69,23 @@ async function initializeCache() {
  * @returns {Array} Array de reguladores IKRO ou erro 503 se cache não pronto
  */
 app.get("/api/reguladores", (req, res) => {
+  console.log(`[API-REQ] GET /api/reguladores - cacheReady: ${cacheReady}, isReady: ${cacheService.isReady("reguladores")}`);
+  
   if (!cacheReady || !cacheService.isReady("reguladores")) {
-    console.warn("[API] Requisição para /api/reguladores antes do cache estar pronto");
+    console.warn(`[API] ⚠️  Reguladores ainda não prontos (cacheReady=${cacheReady})`);
     return res.status(503).json({
       message: "O servidor está preparando os dados. Tente novamente em alguns segundos.",
+      debug: { cacheReady, reguladoresReady: cacheService.isReady("reguladores") }
     });
   }
   
   const data = cacheService.getReguladores();
   if (!data) {
-    console.error("[API] Cache de reguladores vazio!");
+    console.error("[API] ❌ Cache de reguladores vazio!");
     return res.status(500).json({ message: "Erro interno: cache vazio" });
   }
   
+  console.log(`[API] ✅ Reguladores: ${data.length} itens retornados`);
   res.json(data);
 });
 
@@ -123,19 +137,23 @@ app.get("/api/notus/mapping", (req, res) => {
 
 // Busca todos os produtos NOTUS
 app.get("/api/notus", (req, res) => {
+  console.log(`[API-REQ] GET /api/notus - cacheReady: ${cacheReady}, isReady: ${cacheService.isReady("notusProducts")}`);
+  
   if (!cacheReady || !cacheService.isReady("notusProducts")) {
-    console.warn("[API] Requisição para /api/notus antes do cache estar pronto");
+    console.warn(`[API] ⚠️  NOTUS ainda não pronto (cacheReady=${cacheReady})`);
     return res.status(503).json({
       message: "O servidor está preparando os dados. Tente novamente em alguns segundos.",
+      debug: { cacheReady, notusReady: cacheService.isReady("notusProducts") }
     });
   }
 
   const data = cacheService.getNotusProducts();
   if (!data) {
-    console.error("[API] Cache de NOTUS vazio!");
+    console.error("[API] ❌ Cache de NOTUS vazio!");
     return res.status(500).json({ message: "Erro interno: cache vazio" });
   }
 
+  console.log(`[API] ✅ NOTUS: ${data.length} itens retornados`);
   res.json(data);
 });
 
@@ -273,15 +291,24 @@ app.get("/api/health", (req, res) => {
 });
 
 app.listen(PORT, async () => {
+  console.log(`\n[SERVER] ========================================`);
   console.log(`[SERVER] Iniciando em ${NODE_ENV}`);
   console.log(`[SERVER] Porta: ${PORT}`);
   console.log(`[SERVER] URL: ${NODE_ENV === 'production' ? process.env.APP_URL || 'https://seu-app.railway.app' : `http://localhost:${PORT}`}`);
+  console.log(`[SERVER] ========================================\n`);
   
   try {
+    console.log("[SERVER] ⏳ Aguardando inicialização do cache...");
     await initializeCache();
     cacheReady = true;
-    console.log("[SERVER] ✅ Cache inicializado com sucesso");
+    console.log(`\n[SERVER] ✅ CACHE PRONTO! (cacheReady = ${cacheReady})`);
+    console.log(`[SERVER] - Reguladores: ${cacheService.getReguladores()?.length || 0} itens`);
+    console.log(`[SERVER] - NOTUS: ${cacheService.getNotusProducts()?.length || 0} itens`);
+    console.log(`[SERVER] Servidor pronto para requisições\n`);
   } catch (error) {
-    console.error("[SERVER] ❌ Erro na inicialização do cache:", error);
+    console.error(`[SERVER] ❌ FALHA na inicialização do cache!`);
+    console.error(`[SERVER] ${error.message}`);
+    console.error(error);
+    process.exit(1);
   }
 });

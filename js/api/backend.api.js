@@ -17,13 +17,13 @@
  * Com retry automático caso servidor esteja inicializando
  * @async
  * @returns {Promise<Array>} Array de produtos com estrutura IKRO
- * @throws {Error} Se falhar após 3 tentativas
+ * @throws {Error} Se falhar após 5 tentativas
  * @example
  * const products = await fetchProducts();
  */
 export async function fetchProducts() {
-  const maxRetries = 3;
-  const delayMs = 1000;
+  const maxRetries = 5;
+  const delayMs = 1500; // 1.5s base
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
@@ -34,7 +34,7 @@ export async function fetchProducts() {
       }
       
       if (res.status === 503 && attempt < maxRetries) {
-        console.warn(`[API] Servidor inicializando (tentativa ${attempt}/${maxRetries})...`);
+        console.warn(`[API] Servidor inicializando IKRO (tentativa ${attempt}/${maxRetries})...`);
         await new Promise(resolve => setTimeout(resolve, delayMs * attempt));
         continue;
       }
