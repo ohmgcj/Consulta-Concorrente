@@ -3,6 +3,7 @@ import * as BackendAPI from "./api/backend.api.js";
 import * as IkroUI from "./ui/ikro.ui.js";
 import * as NotusUI from "./ui/notus.ui.js";
 import { showElement, hideElement } from "./common/dom.js";
+import { searchHistory } from "./common/utils.js";
 
 let products = [];
 let codeMapping = [];
@@ -53,12 +54,84 @@ async function loadNotusData() {
   }
 }
 
+// =====================================================================
+// FUNÇÕES DE UI: SPINNER E HISTÓRICO
+// =====================================================================
+
+/**
+ * Mostra/esconde o spinner de carregamento
+ */
+function showLoadingSpinner(show = true) {
+  const spinner = document.getElementById("result-loading-spinner");
+  const content = document.getElementById("result-content");
+  
+  if (show) {
+    spinner.classList.remove("hidden");
+    content.classList.add("hidden");
+  } else {
+    spinner.classList.add("hidden");
+    content.classList.remove("hidden");
+  }
+}
+
+/**
+ * Renderiza o histórico de buscas
+ */
+function renderSearchHistory() {
+  const history = searchHistory.get();
+  const container = document.getElementById("search-history-container");
+  const historyList = document.getElementById("search-history");
+  
+  if (history.length === 0) {
+    container.classList.add("hidden");
+    return;
+  }
+  
+  container.classList.remove("hidden");
+  historyList.innerHTML = "";
+  
+  history.forEach(code => {
+    const badge = document.createElement("button");
+    badge.className = "px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors duration-200 border border-gray-300 font-medium";
+    badge.textContent = code;
+    badge.addEventListener("click", () => {
+      // Refaz a busca
+      const currentTab = document.getElementById("search-tab-ikro").classList.contains("border-b-[#cd9931]");
+      if (currentTab) {
+        document.getElementById("searchInput").value = code;
+        buscarProdutoIkro();
+      } else {
+        document.getElementById("notusSearchInput").value = code;
+        buscarProdutoNotus();
+      }
+    });
+    historyList.appendChild(badge);
+  });
+}
+
+/**
+ * Limpa o histórico de buscas
+ */
+function clearSearchHistory() {
+  searchHistory.clear();
+  renderSearchHistory();
+}
+
 function buscarProdutoIkro() {
   const searchInput = document.getElementById("searchInput");
   const resultContainer = document.getElementById("result-container");
   const userInput = searchInput.value.trim();
   if (!userInput) return;
 
+  // Mostra container
+  showElement("result-container");
+  showLoadingSpinner(true);
+
+  // Adiciona ao histórico
+  searchHistory.add(userInput);
+  renderSearchHistory();
+
+  // Busca imediatamente (sem delay)
   let searchTerm = userInput;
   const mappingEntry = codeMapping.find(
     (item) => String(item.meu_codigo) === userInput,
@@ -83,33 +156,58 @@ function buscarProdutoIkro() {
   });
 
   if (!foundProduct) {
+    showLoadingSpinner(false);
     hideElement("result-container");
     IkroUI.showIkroStatus("Produto não encontrado.");
     return;
   }
 
+  // Renderiza produto imediatamente
   IkroUI.renderIkroProduct(foundProduct.attributes);
+  showLoadingSpinner(false);
+  IkroUI.showIkroStatus("");
+
+  // Carrega aplicações em background (sem bloquear UI)
   const appElem = document.getElementById("product-application");
-  appElem.innerHTML = "<li>Carregando aplicações...</li>";
-  BackendAPI.fetchApplications(foundProduct.grupo, foundProduct.item)
+  appElem.innerHTML = "<li class='text-gray-400 animate-pulse'>Carregando aplicações...</li>";
+
+  // Garante que grupo e item são strings numéricas
+  const grupo = String(foundProduct.grupo || "").trim();
+  const item = String(foundProduct.item || "").trim();
+
+  console.log("[DEBUG] foundProduct keys:", Object.keys(foundProduct));
+  console.log("[DEBUG] grupo:", grupo, "item:", item);
+
+  if (!grupo || !item) {
+    appElem.innerHTML = "<li class='text-gray-400'>Sem aplicações cadastradas.</li>";
+    return;
+  }
+
+  BackendAPI.fetchApplications(grupo, item)
     .then((data) => {
+      console.log("[DEBUG] Dados de aplicações recebidos:", data);
       appElem.innerHTML = "";
-      if (data && data.length > 0) {
-        data.forEach((app) => {
-          const attrs = app.attributes;
+      
+      // Trata estrutura { detalhe, aplicacao }
+      const apps = (data && data.aplicacao) ? data.aplicacao : (Array.isArray(data) ? data : []);
+      
+      if (apps && apps.length > 0) {
+        apps.forEach((app) => {
           const li = document.createElement("li");
-          li.textContent = `${attrs.marca_aplic} – ${attrs.aplicacao}`;
+          // Trata ambas as estruturas: com .attributes ou direto
+          const marca = app.attributes?.marca_aplic || app.marca_aplic || "-";
+          const aplicacao = app.attributes?.aplicacao || app.aplicacao || "-";
+          li.textContent = `${marca} – ${aplicacao}`;
           appElem.appendChild(li);
         });
       } else {
-        appElem.innerHTML = "<li>Sem aplicações cadastradas.</li>";
+        appElem.innerHTML = "<li class='text-gray-400'>Sem aplicações cadastradas.</li>";
       }
     })
-    .catch(() => {
-      appElem.innerHTML = "<li>Erro ao carregar aplicações.</li>";
+    .catch((err) => {
+      console.error("Erro ao carregar aplicações:", err);
+      appElem.innerHTML = "<li class='text-gray-400'>Sem aplicações disponíveis.</li>";
     });
-  showElement("result-container");
-  IkroUI.showIkroStatus("");
 }
 
 /**
@@ -121,6 +219,15 @@ function buscarProdutoNotus() {
   const userInput = searchInput.value.trim();
   if (!userInput) return;
 
+  // Mostra container
+  showElement("result-container");
+  showLoadingSpinner(true);
+
+  // Adiciona ao histórico
+  searchHistory.add(userInput);
+  renderSearchHistory();
+
+  // Busca imediatamente (sem delay)
   let searchCode = userInput;
   
   // Primeiro, tenta encontrar direto no NOTUS
@@ -143,13 +250,15 @@ function buscarProdutoNotus() {
   }
 
   if (!foundProduct) {
+    showLoadingSpinner(false);
     hideElement("result-container");
     NotusUI.showNotusStatus("Produto não encontrado.");
     return;
   }
 
+  // Renderiza produto imediatamente
   NotusUI.renderNotusProduct(foundProduct);
-  showElement("result-container");
+  showLoadingSpinner(false);
   NotusUI.showNotusStatus("");
 }
 
@@ -206,6 +315,15 @@ function mostrarGaps() {
 document.addEventListener("DOMContentLoaded", async () => {
   // Carrega dados de ambos os provedores
   await Promise.all([loadIkroData(), loadNotusData()]);
+
+  // Renderiza histórico de buscas
+  renderSearchHistory();
+
+  // --- EVENTOS DE HISTÓRICO ---
+  const clearHistoryBtn = document.getElementById("clear-history-btn");
+  if (clearHistoryBtn) {
+    clearHistoryBtn.addEventListener("click", clearSearchHistory);
+  }
 
   // --- EVENTOS IKRO ---
   const searchButton = document.getElementById("searchButton");
