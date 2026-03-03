@@ -12,10 +12,40 @@
  * @example
  * const products = await fetchProducts();
  */
+/**
+ * Busca lista de produtos reguladores do IKRO (em cache no servidor)
+ * Com retry automático caso servidor esteja inicializando
+ * @async
+ * @returns {Promise<Array>} Array de produtos com estrutura IKRO
+ * @throws {Error} Se falhar após 3 tentativas
+ * @example
+ * const products = await fetchProducts();
+ */
 export async function fetchProducts() {
-  const res = await fetch('/api/reguladores');
-  if (!res.ok) throw new Error('Erro ao buscar produtos IKRO');
-  return res.json();
+  const maxRetries = 3;
+  const delayMs = 1000;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch('/api/reguladores');
+      
+      if (res.ok) {
+        return await res.json();
+      }
+      
+      if (res.status === 503 && attempt < maxRetries) {
+        console.warn(`[API] Servidor inicializando (tentativa ${attempt}/${maxRetries})...`);
+        await new Promise(resolve => setTimeout(resolve, delayMs * attempt));
+        continue;
+      }
+      
+      throw new Error(`Erro ao buscar produtos IKRO: ${res.status} ${res.statusText}`);
+    } catch (error) {
+      if (attempt === maxRetries) {
+        throw error;
+      }
+    }
+  }
 }
 
 /**

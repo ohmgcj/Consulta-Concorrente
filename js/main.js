@@ -19,6 +19,44 @@ let gapsState = {
   ordenar: 'codigo'
 };
 
+// =====================================================================
+// FUNÇÕES AUXILIARES DE FETCH COM RETRY
+// =====================================================================
+
+/**
+ * Faz requisição com retry automático (para quando servidor está inicializando)
+ * @async
+ * @param {string} url - URL a requisitar
+ * @param {number} maxRetries - Máximo de tentativas
+ * @returns {Promise<any>} JSON da resposta
+ * @throws {Error} Se falhar após todas tentativas
+ */
+async function fetchWithRetry(url, maxRetries = 3) {
+  const delayMs = 1000;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch(url);
+      
+      if (res.ok) {
+        return await res.json();
+      }
+      
+      if (res.status === 503 && attempt < maxRetries) {
+        console.warn(`[FETCH] Servidor inicializando (${url}) - tentativa ${attempt}/${maxRetries}`);
+        await new Promise(resolve => setTimeout(resolve, delayMs * attempt));
+        continue;
+      }
+      
+      throw new Error(`HTTP ${res.status} ${res.statusText}`);
+    } catch (error) {
+      if (attempt === maxRetries) {
+        throw error;
+      }
+    }
+  }
+}
+
 async function loadIkroData() {
   IkroUI.showIkroStatus("Carregando base de dados...");
   try {
@@ -39,10 +77,7 @@ async function loadNotusData() {
   NotusUI.showNotusStatus("Carregando catálogo NOTUS...");
   try {
     const [notusData, notusMap] = await Promise.all([
-      fetch('/api/notus').then(res => {
-        if (!res.ok) throw new Error('Erro ao carregar NOTUS');
-        return res.json();
-      }),
+      fetchWithRetry('/api/notus'),
       BackendAPI.fetchNotusMapping(),
     ]);
     notusProducts = notusData;

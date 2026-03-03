@@ -59,13 +59,20 @@ async function initializeCache() {
  * @returns {Array} Array de reguladores IKRO ou erro 503 se cache não pronto
  */
 app.get("/api/reguladores", (req, res) => {
-  if (cacheService.isReady("reguladores")) {
-    res.json(cacheService.getReguladores());
-  } else {
-    res.status(503).json({
+  if (!cacheReady || !cacheService.isReady("reguladores")) {
+    console.warn("[API] Requisição para /api/reguladores antes do cache estar pronto");
+    return res.status(503).json({
       message: "O servidor está preparando os dados. Tente novamente em alguns segundos.",
     });
   }
+  
+  const data = cacheService.getReguladores();
+  if (!data) {
+    console.error("[API] Cache de reguladores vazio!");
+    return res.status(500).json({ message: "Erro interno: cache vazio" });
+  }
+  
+  res.json(data);
 });
 
 /**
@@ -115,14 +122,21 @@ app.get("/api/notus/mapping", (req, res) => {
 });
 
 // Busca todos os produtos NOTUS
-app.get("/api/notus", async (req, res) => {
-  try {
-    const products = await notusProvider.fetchNotusProducts();
-    res.json(products);
-  } catch (error) {
-    console.error("Erro ao buscar produtos NOTUS", error.message);
-    res.status(500).json({ message: "Erro ao buscar dados NOTUS" });
+app.get("/api/notus", (req, res) => {
+  if (!cacheReady || !cacheService.isReady("notusProducts")) {
+    console.warn("[API] Requisição para /api/notus antes do cache estar pronto");
+    return res.status(503).json({
+      message: "O servidor está preparando os dados. Tente novamente em alguns segundos.",
+    });
   }
+
+  const data = cacheService.getNotusProducts();
+  if (!data) {
+    console.error("[API] Cache de NOTUS vazio!");
+    return res.status(500).json({ message: "Erro interno: cache vazio" });
+  }
+
+  res.json(data);
 });
 
 // Busca produtos NOTUS com filtros
@@ -246,9 +260,28 @@ app.get("/api/mappings/info", (req, res) => {
 // --- SERVIR ARQUIVOS ESTÁTICOS E INICIAR ---
 app.use(express.static(__dirname));
 
+let cacheReady = false;
+
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: cacheReady ? "ready" : "initializing",
+    cacheReady,
+    reguladoresReady: cacheService.isReady("reguladores"),
+    notusReady: cacheService.isReady("notusProducts"),
+  });
+});
+
 app.listen(PORT, async () => {
   console.log(`[SERVER] Iniciando em ${NODE_ENV}`);
   console.log(`[SERVER] Porta: ${PORT}`);
   console.log(`[SERVER] URL: ${NODE_ENV === 'production' ? process.env.APP_URL || 'https://seu-app.railway.app' : `http://localhost:${PORT}`}`);
-  await initializeCache();
+  
+  try {
+    await initializeCache();
+    cacheReady = true;
+    console.log("[SERVER] ✅ Cache inicializado com sucesso");
+  } catch (error) {
+    console.error("[SERVER] ❌ Erro na inicialização do cache:", error);
+  }
 });
