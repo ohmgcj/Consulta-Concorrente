@@ -58,7 +58,7 @@ async function fetchWithRetry(url, maxRetries = 3) {
 }
 
 async function loadIkroData() {
-  IkroUI.showIkroStatus("Carregando base de dados...");
+  updateStatusWithLoader("status-message", "Carregando base de dados...", true);
   try {
     const [prod, mapping] = await Promise.all([
       BackendAPI.fetchProducts(),
@@ -66,15 +66,15 @@ async function loadIkroData() {
     ]);
     products = prod;
     codeMapping = mapping;
-    IkroUI.showIkroStatus("Pronto para consulta.");
+    updateStatusWithLoader("status-message", "Pronto para consulta.", false);
   } catch (err) {
-    IkroUI.showIkroStatus("Erro ao carregar dados.");
+    updateStatusWithLoader("status-message", "Erro ao carregar dados.", false);
     console.error(err);
   }
 }
 
 async function loadNotusData() {
-  NotusUI.showNotusStatus("Carregando catálogo NOTUS...");
+  updateStatusWithLoader("notus-status-message", "Carregando catálogo NOTUS...", true);
   try {
     const [notusData, notusMap] = await Promise.all([
       fetchWithRetry('/api/notus'),
@@ -82,9 +82,9 @@ async function loadNotusData() {
     ]);
     notusProducts = notusData;
     notusMapping = notusMap;
-    NotusUI.showNotusStatus("Pronto para consulta.");
+    updateStatusWithLoader("notus-status-message", "Pronto para consulta.", false);
   } catch (err) {
-    NotusUI.showNotusStatus("Erro ao carregar dados.");
+    updateStatusWithLoader("notus-status-message", "Erro ao carregar dados.", false);
     console.error(err);
   }
 }
@@ -106,6 +106,29 @@ function showLoadingSpinner(show = true) {
   } else {
     spinner.classList.add("hidden");
     content.classList.remove("hidden");
+  }
+}
+
+/**
+ * Atualiza status com indicador visual de loading
+ */
+function updateStatusWithLoader(elementId, message, isLoading = true) {
+  const elem = document.getElementById(elementId);
+  if (!elem) return;
+  
+  if (isLoading) {
+    elem.innerHTML = `
+      <div class="flex items-center gap-2">
+        <div class="inline-flex gap-1">
+          <div class="w-2 h-2 rounded-full bg-[#cd9931] animate-bounce" style="animation-delay: 0s"></div>
+          <div class="w-2 h-2 rounded-full bg-[#cd9931] animate-bounce" style="animation-delay: 0.2s"></div>
+          <div class="w-2 h-2 rounded-full bg-[#cd9931] animate-bounce" style="animation-delay: 0.4s"></div>
+        </div>
+        <span class="text-sm text-gray-600">${message}</span>
+      </div>
+    `;
+  } else {
+    elem.textContent = message;
   }
 }
 
