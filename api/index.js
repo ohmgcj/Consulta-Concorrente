@@ -1,7 +1,8 @@
 // =================================================================
-// server.js
+// api/index.js
 // Servidor Express: Roteamento, Orquestração e Cache
-// Conecta frontend (js/api/backend.api.js) com providers externos
+// Conecta frontend com providers externos
+// Adaptado para Vercel Serverless
 // =================================================================
 
 import express from "express";
@@ -275,8 +276,19 @@ app.get("/api/mappings/info", (req, res) => {
   res.json(info);
 });
 
-// --- SERVIR ARQUIVOS ESTÁTICOS E INICIAR ---
-app.use(express.static(__dirname));
+// --- SERVIR ARQUIVOS ESTÁTICOS ---
+// Em Vercel, a pasta 'public' é servida como raiz
+app.use(express.static(path.join(__dirname, '../public')));
+
+// Fallback para SPA: redireciona rotas não encontradas para index.html
+app.get('*', (req, res) => {
+  // Não serve index.html para rotas /api, apenas para frontend
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, '../public/index.html'));
+  } else {
+    res.status(404).json({ message: "Rota não encontrada" });
+  }
+});
 
 let cacheReady = false;
 
@@ -290,11 +302,16 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-app.listen(PORT, async () => {
+// --- INICIALIZAÇÃO DO CACHE (uma única vez) ---
+let cacheInitialized = false;
+
+async function startServer() {
+  if (cacheInitialized) return;
+  cacheInitialized = true;
+  
   console.log(`\n[SERVER] ========================================`);
   console.log(`[SERVER] Iniciando em ${NODE_ENV}`);
   console.log(`[SERVER] Porta: ${PORT}`);
-  console.log(`[SERVER] URL: ${NODE_ENV === 'production' ? process.env.APP_URL || 'https://seu-app.railway.app' : `http://localhost:${PORT}`}`);
   console.log(`[SERVER] ========================================\n`);
   
   try {
@@ -311,4 +328,22 @@ app.listen(PORT, async () => {
     console.error(error);
     process.exit(1);
   }
+}
+
+// Iniciar cache quando a primeira requisição chegar
+app.use((req, res, next) => {
+  if (!cacheInitialized) {
+    startServer();
+  }
+  next();
 });
+
+// Para desenvolvimento local
+if (NODE_ENV === 'development') {
+  app.listen(PORT, () => {
+    console.log(`Local: http://localhost:${PORT}`);
+  });
+}
+
+// Exportar para Vercel
+export default app;

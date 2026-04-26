@@ -1,0 +1,22 @@
+{
+  "buildCommand": "npm install",
+  "outputDirectory": "public",
+  "public": true,
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api"
+    },
+    {
+      "source": "/mappings/(.*)",
+      "destination": "/public/mappings/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/public/$1"
+    }
+  ]
+}
