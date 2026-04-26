@@ -9,7 +9,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const MAPPINGS_DIR = path.join(__dirname, "..", "mappings");
+// Em desenvolvimento: api/services/../../public/mappings
+// Em produção (Vercel): /var/task/public/mappings
+const MAPPINGS_DIR = path.join(__dirname, "..", "..", "public", "mappings");
 
 /**
  * Serviço de Mapeamento

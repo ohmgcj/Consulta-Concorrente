@@ -281,7 +281,7 @@ app.get("/api/mappings/info", (req, res) => {
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Fallback para SPA: redireciona rotas não encontradas para index.html
-app.get('*', (req, res) => {
+app.use((req, res) => {
   // Não serve index.html para rotas /api, apenas para frontend
   if (!req.path.startsWith('/api')) {
     res.sendFile(path.join(__dirname, '../public/index.html'));
