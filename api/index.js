@@ -207,21 +207,36 @@ app.get("/api/notus/gap", async (req, res) => {
  * @param {string} ordenar - Ordenação: 'codigo', 'descricao', 'preco' (default: 'codigo')
  * @returns {Object} {itens, total, paginas, pagina, itemsPorPagina, stats}
  */
-app.get("/api/notus/gaps-analysis", (req, res) => {
-  const pagina = parseInt(req.query.pagina) || 1;
-  const itemsPorPagina = parseInt(req.query.itemsPorPagina) || 10;
-  const codigo = req.query.codigo || '';
-  const categoria = req.query.categoria || '';
-  const ordenar = req.query.ordenar || 'codigo';
+app.get("/api/notus/gaps-analysis", async (req, res) => {
+  try {
+    const pagina = parseInt(req.query.pagina) || 1;
+    const itemsPorPagina = parseInt(req.query.itemsPorPagina) || 10;
+    const codigo = req.query.codigo || '';
+    const categoria = req.query.categoria || '';
+    const ordenar = req.query.ordenar || 'codigo';
 
-  const filtros = { codigo, categoria, ordenar };
-  const resultado = gapAnalysisService.obterGaps(pagina, itemsPorPagina, filtros);
-  const stats = gapAnalysisService.obterEstatisticas();
+    // IMPORTANTE: Analisar gaps com dados atualizados
+    console.log("[API] Analisando gaps de mapeamento NOTUS...");
+    const notusProducts = await notusProvider.fetchNotusProducts();
+    const notusMapping = mappingService.getMappingByProvider('notus');
+    gapAnalysisService.analisarGaps(notusProducts, notusMapping);
 
-  res.json({
-    ...resultado,
-    stats
-  });
+    const filtros = { codigo, categoria, ordenar };
+    const resultado = gapAnalysisService.obterGaps(pagina, itemsPorPagina, filtros);
+    const stats = gapAnalysisService.obterEstatisticas();
+
+    console.log(`[API] ✅ Gaps retornados: ${resultado.total} itens`);
+    res.json({
+      ...resultado,
+      stats
+    });
+  } catch (error) {
+    console.error("[API] ❌ Erro ao analisar gaps:", error.message);
+    res.status(500).json({ 
+      message: "Erro ao analisar lacunas",
+      error: error.message
+    });
+  }
 });
 
 /**
