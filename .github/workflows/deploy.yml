@@ -32,13 +32,8 @@ jobs:
     - name: Test
       run: npm test
     
-    - name: Deploy to Railway (main branch)
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      env:
-        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-      run: |
-        npm install -g @railway/cli
-        railway up
+    # Deploy para Vercel será feito automaticamente quando conectar no painel do Vercel
+    # Documentação: https://github.com/ohmgcj/Consulta-Concorrente/blob/main/VERCEL_DEPLOY.md
 
     - name: Notify on failure
       if: failure()
