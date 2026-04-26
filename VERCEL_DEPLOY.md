@@ -2,6 +2,13 @@
 
 Seu projeto foi reestruturado para funcionar com **Vercel** (serverless) ao invés de Railway.
 
+## ✅ Mudanças Importantes (v2)
+
+**APIs agora funcionam sob demanda** - Não há mais espera por cache inicial!
+- ✅ Fetch direto das APIs IKRO/NOTUS quando solicitado
+- ✅ Zero tempo de espera (sem 503 Service Unavailable)
+- ✅ Compatível com Vercel serverless
+
 ## ✅ Nova Estrutura
 
 ```
@@ -38,7 +45,44 @@ seu-projeto/
 
 ---
 
-## 🚀 Passo 1: Conectar ao Vercel
+## � Como Debugar no Vercel (Acesso aos Logs)
+
+### **Via Dashboard Web**
+
+1. Acesse [vercel.com](https://vercel.com)
+2. Selecione seu projeto **"Consulta-Concorrente"**
+3. Clique em **"Deployments"** (tab no topo)
+4. Selecione o deployment mais recente
+5. Clique em **"Logs"** ou **"Function Logs"**
+6. Filtre por:
+   - `[API]` - logs das requisições
+   - `[MAPPING]` - logs de mapeamentos
+   - `Error` - apenas erros
+
+### **Via CLI (Tempo Real)**
+
+```bash
+# Instalar se não tiver
+npm install -g vercel
+
+# Ver logs em tempo real
+vercel logs https://seu-projeto.vercel.app --follow
+
+# Ou com nome do projeto
+vercel logs --follow
+```
+
+### **Via Postman/Insomnia (Testar APIs)**
+
+```bash
+# Teste local primeiro
+curl http://localhost:3000/api/reguladores
+
+# Depois em produção
+curl https://seu-projeto.vercel.app/api/reguladores
+```
+
+---
 
 ### Opção A: via CLI (recomendado)
 
@@ -107,20 +151,28 @@ Após deploy no Vercel, você terá:
 
 ## ⚙️ O que mudou no código?
 
-### `api/index.js` (era `server.js`)
+### `api/index.js` - Arquitetura Serverless
 
-✅ **Agora exporta o app Express** para Vercel:
+**ANTES:** Tentava carregar tudo na inicialização
 ```javascript
-export default app;
+// ❌ Não funciona em Vercel
+await initializeCache()  // timeout!
 ```
 
-✅ **Paths ajustados**:
-- Arquivos estáticos: `../public` ao invés de `.`
-- Providers/services: `./providers` e `./services` (mesmo nível)
+**AGORA:** Fetch under-demand (mais rápido)
+```javascript
+// ✅ Funciona em Vercel
+app.get("/api/reguladores", async (req, res) => {
+  const reguladores = await ikroProvider.fetchIkroReguladores();
+  res.json(reguladores);
+});
+```
 
-✅ **Inicialização lazy** (sob demanda):
-- Cache inicia na primeira requisição, não no startup
-- Evita timeouts em serverless
+**Vantagens:**
+- ✅ Zero tempo de inicialização
+- ✅ Sem 503 Service Unavailable
+- ✅ Escalável (cada requisição é independente)
+- ✅ Funciona em cold starts
 
 ---
 
